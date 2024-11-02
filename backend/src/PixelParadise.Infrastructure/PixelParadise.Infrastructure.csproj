@@ -15,4 +15,8 @@
       <ProjectReference Include="..\PixelParadise.Domain\PixelParadise.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Contexts\" />
+    </ItemGroup>
+
 </Project>
