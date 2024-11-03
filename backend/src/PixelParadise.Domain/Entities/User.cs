@@ -2,18 +2,20 @@
 
 public class User : BaseEntity
 {
-    public User(string userName, string nickName, string email, int age)
+    public User(string username, string nickname, string email, int age)
     {
-        UserName = userName;
-        NickName = nickName;
+        Username = username;
+        Nickname = nickname;
         Email = email;
         Age = age;
     }
 
-    protected User() { }
-    
-    public string UserName { get; set; }
-    public string NickName { get; set; }
+    public User()
+    {
+    }
+
+    public string Username { get; set; }
+    public string Nickname { get; set; }
     public string Email { get; set; }
     public int Age { get; set; }
     public List<Rental> Rentals { get; set; } = [];

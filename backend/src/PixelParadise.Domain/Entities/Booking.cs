@@ -2,7 +2,8 @@
 
 public class Booking : BaseEntity
 {
-    public Booking(Guid rentalId, Rental rental, Guid userId, User user, DateTimeOffset checkIn, DateTimeOffset checkOut, decimal amountPaid, BookingStatus status = BookingStatus.Pending)
+    public Booking(Guid rentalId, Rental rental, Guid userId, User user, DateTimeOffset checkIn,
+        DateTimeOffset checkOut, decimal amountPaid, BookingStatus status = BookingStatus.Pending)
     {
         RentalId = rentalId;
         Rental = rental;
@@ -13,15 +14,17 @@ public class Booking : BaseEntity
         AmountPaid = amountPaid;
         Status = status;
     }
-    
-    protected Booking() { }
-    
+
+    public Booking()
+    {
+    }
+
     public Guid RentalId { get; set; }
     public Rental Rental { get; set; }
-    
+
     public Guid UserId { get; set; }
     public User User { get; set; }
-    
+
     public DateTimeOffset CheckIn { get; set; }
     public DateTimeOffset CheckOut { get; set; }
     public decimal AmountPaid { get; set; }

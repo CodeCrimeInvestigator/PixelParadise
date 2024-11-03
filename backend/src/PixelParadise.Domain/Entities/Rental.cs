@@ -10,8 +10,11 @@ public class Rental : BaseEntity
         Owner = owner;
         Bookings = [];
     }
-    
-    protected Rental() { }
+
+    public Rental()
+    {
+    }
+
     public string Name { get; set; }
     public string Description { get; set; }
     public int Price { get; set; }
