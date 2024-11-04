@@ -9,12 +9,6 @@ namespace PixelParadise.Infrastructure.Repositories;
 public interface IRepository<T> where T : class
 {
     /// <summary>
-    /// Asynchronously retrieves all entities.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of entities.</returns>
-    Task<IEnumerable<T>> GetAllAsync();
-
-    /// <summary>
     /// Asynchronously retrieves an entity by its unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the entity.</param>
@@ -51,12 +45,6 @@ public interface IRepository<T> where T : class
 public class Repository<T>(PixelParadiseContext ctx) : IRepository<T> where T : class
 {
     private DbSet<T> _set => ctx.Set<T>();
-
-    /// <inheritdoc />
-    public async Task<IEnumerable<T>> GetAllAsync()
-    {
-        return await _set.ToListAsync();
-    }
 
     /// <inheritdoc />
     public async Task<T?> GetAsync(Guid id)
