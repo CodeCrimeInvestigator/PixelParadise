@@ -19,6 +19,16 @@ public class PixelParadiseContext(DbContextOptions<PixelParadiseContext> options
                 b => b.ToString(),
                 b => Enum.Parse<BookingStatus>(b));
         
+        modelBuilder.Entity<Rental>()
+            .HasOne(r => r.Owner)
+            .WithMany(u => u.Rentals)
+            .HasForeignKey(r => r.OwnerId)
+            .IsRequired();
+        
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
+        
         base.OnModelCreating(modelBuilder);
     }
 }
