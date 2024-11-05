@@ -1,13 +1,15 @@
-﻿namespace PixelParadise.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace PixelParadise.Domain.Entities;
 
 public class Rental : BaseEntity
 {
-    public Rental(string name, string description, int price, User owner)
+    public Rental(string name, string description, int price, Guid ownerId, User owner)
     {
         Name = name;
         Description = description;
         Price = price;
-        Owner = owner;
+        OwnerId = ownerId;
         Bookings = [];
     }
 
@@ -18,6 +20,9 @@ public class Rental : BaseEntity
     public string Name { get; set; }
     public string Description { get; set; }
     public int Price { get; set; }
-    public User Owner { get; set; }
+    public Guid OwnerId { get; set; }
+
+    [NotMapped] public User Owner { get; set; }
+
     public List<Booking> Bookings { get; set; } = [];
 }

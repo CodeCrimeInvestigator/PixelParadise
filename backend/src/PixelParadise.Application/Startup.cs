@@ -44,9 +44,14 @@ public class Startup
             options.UseNpgsql(_postgreSqlOptions.GetConnectionString), contextLifetime: ServiceLifetime.Singleton);
 
         services.AddSingleton(typeof(IRepository<>), typeof(Repository<>));
+       
+        // add user related services
         services.AddSingleton<IUserRepository, UserRepository>();
         services.AddSingleton<IUserService, UserService>();
-
+        
+        // add rental related services
+        services.AddSingleton<IRentalService, RentalService>();
+        services.AddSingleton<IRentalRepository, RentalRepository>();
 
         if (_startupOptions.EnableSwagger)
             services.AddSwaggerGen(c =>

@@ -17,4 +17,14 @@ public static class ApiEndpoints
         public const string Update = $"{Base}/{{userId:guid}}";
         public const string Delete = $"{Base}/{{userId:guid}}";
     }
+
+    public static class Rentals
+    {
+        private const string Base = $"{ApiBase}/rentals";
+        public const string Create = Base;
+        public const string Get = $"{Base}/{{rentalId:guid}}";
+        public const string GetAll = Base;
+        public const string Update = $"{Base}/{{rentalId:guid}}";
+        public const string Delete = $"{Base}/{{rentalId:guid}}";
+    }
 }
