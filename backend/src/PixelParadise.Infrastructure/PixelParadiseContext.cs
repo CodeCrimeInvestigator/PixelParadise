@@ -29,6 +29,18 @@ public class PixelParadiseContext(DbContextOptions<PixelParadiseContext> options
             .HasIndex(u => u.Username)
             .IsUnique();
         
+        modelBuilder.Entity<Booking>()
+            .HasOne(b => b.User)
+            .WithMany(u => u.Bookings)
+            .HasForeignKey(r => r.UserId)
+            .IsRequired();
+        
+        modelBuilder.Entity<Booking>()
+            .HasOne(b => b.Rental)
+            .WithMany(r => r.Bookings)
+            .HasForeignKey(r => r.RentalId)
+            .IsRequired();
+        
         base.OnModelCreating(modelBuilder);
     }
 }

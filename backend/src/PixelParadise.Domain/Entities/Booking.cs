@@ -2,13 +2,11 @@
 
 public class Booking : BaseEntity
 {
-    public Booking(Guid rentalId, Rental rental, Guid userId, User user, DateTimeOffset checkIn,
+    public Booking(Guid rentalId, Guid userId, DateTimeOffset checkIn,
         DateTimeOffset checkOut, decimal amountPaid, BookingStatus status = BookingStatus.Pending)
     {
         RentalId = rentalId;
-        Rental = rental;
         UserId = userId;
-        User = user;
         CheckIn = checkIn;
         CheckOut = checkOut;
         AmountPaid = amountPaid;
