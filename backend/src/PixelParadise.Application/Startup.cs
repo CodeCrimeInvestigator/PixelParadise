@@ -9,17 +9,17 @@ using PixelParadise.Infrastructure.Repositories;
 namespace PixelParadise.Application;
 
 /// <summary>
-/// The Startup class is responsible for configuring services and the application pipeline.
-/// It reads configuration settings and sets up dependency injection for the application.
+///     The Startup class is responsible for configuring services and the application pipeline.
+///     It reads configuration settings and sets up dependency injection for the application.
 /// </summary>
 public class Startup
 {
     private readonly IConfiguration _configuration;
-    private readonly StartupOptions _startupOptions;
     private readonly PostgreSqlOptions _postgreSqlOptions;
+    private readonly StartupOptions _startupOptions;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Startup"/> class.
+    ///     Initializes a new instance of the <see cref="Startup" /> class.
     /// </summary>
     public Startup(IConfiguration configuration)
     {
@@ -33,25 +33,29 @@ public class Startup
     }
 
     /// <summary>
-    /// Configures the services for the application.
-    /// This method is called by the runtime to add services to the dependency injection container.
+    ///     Configures the services for the application.
+    ///     This method is called by the runtime to add services to the dependency injection container.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
     /// <param name="builderEnvironment">The hosting environment the application is running in.</param>
     public void ConfigureServices(IServiceCollection services, IWebHostEnvironment builderEnvironment)
     {
         services.AddDbContext<PixelParadiseContext>(options =>
-            options.UseNpgsql(_postgreSqlOptions.GetConnectionString), contextLifetime: ServiceLifetime.Singleton);
+            options.UseNpgsql(_postgreSqlOptions.GetConnectionString), ServiceLifetime.Singleton);
 
         services.AddSingleton(typeof(IRepository<>), typeof(Repository<>));
-       
+
         // add user related services
         services.AddSingleton<IUserRepository, UserRepository>();
         services.AddSingleton<IUserService, UserService>();
-        
+
         // add rental related services
         services.AddSingleton<IRentalService, RentalService>();
         services.AddSingleton<IRentalRepository, RentalRepository>();
+
+        // add booking related services
+        services.AddSingleton<IBookingRepository, BookingRepository>();
+        services.AddSingleton<IBookingService, BookingService>();
 
         if (_startupOptions.EnableSwagger)
             services.AddSwaggerGen(c =>
@@ -67,8 +71,8 @@ public class Startup
     }
 
     /// <summary>
-    /// Configures the application request pipeline.
-    /// This method is called by the runtime to configure the HTTP request pipeline.
+    ///     Configures the application request pipeline.
+    ///     This method is called by the runtime to configure the HTTP request pipeline.
     /// </summary>
     /// <param name="app">The application builder.</param>
     /// <param name="builderEnvironment">The hosting environment the application is running in.</param>

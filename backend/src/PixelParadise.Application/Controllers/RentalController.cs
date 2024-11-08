@@ -7,7 +7,7 @@ namespace PixelParadise.Application.Controllers;
 
 /// <summary>
 ///     Provides API endpoints for managing rental-related operations.
-///     This controller handles HTTP requests related to users, such as creating, retrieving, updating, and deleting user
+///     This controller handles HTTP requests related to rentals, such as creating, retrieving, updating, and deleting rental
 ///     information.
 /// </summary>
 [ApiController]

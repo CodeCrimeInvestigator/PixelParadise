@@ -1,51 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PixelParadise.Domain.Entities;
+using PixelParadise.Domain.Options;
 
 namespace PixelParadise.Infrastructure.Repositories;
 
 /// <summary>
-/// Represents a repository for managing booking-related data.
+///     Represents a repository for managing booking-related data.
 /// </summary>
 public interface IBookingRepository : IRepository<Booking>
 {
-    /// <summary>
-    /// Asynchronously retrieves a list of users who have booked the specified rental.
-    /// </summary>
-    /// <param name="rentalId">The unique identifier of the rental.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a list of users who have booked the rental.</returns>
-    Task<List<User>> GetAllUsersWhoBookedRentalAsync(Guid rentalId);
-    
-    /// <summary>
-    /// Asynchronously retrieves a list of users who have booked the specified rental within a given time period.
-    /// </summary>
-    /// <param name="rentalId">The unique identifier of the rental.</param>
-    /// <param name="startDate">The start date of the time period.</param>
-    /// <param name="endDate">The end date of the time period.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a list of users who have booked the rental within the specified time period.</returns>
-    Task<List<User>> GetAllUsersWhoBookedRentalInTimePeriodAsync(Guid rentalId, DateTime startDate, DateTime endDate);
+    Task<List<Booking>> GetAllAsync(GetAllBookingOptions options);
 }
 
 /// <summary>
-/// Provides methods for accessing booking data from the database.
+///     Provides methods for accessing booking data from the database.
 /// </summary>
 public class BookingRepository(PixelParadiseContext ctx) : Repository<Booking>(ctx), IBookingRepository
 {
-    /// <inheritdoc />
-    public async Task<List<User>> GetAllUsersWhoBookedRentalAsync(Guid rentalId)
+    public async Task<List<Booking>> GetAllAsync(GetAllBookingOptions options)
     {
-        return await ctx.Bookings
-            .Where(b => b.RentalId == rentalId)
-            .Select(b => b.User)
-            .ToListAsync();
-    }
+        var query = ctx.Bookings.AsQueryable();
 
-    /// <inheritdoc />
-    public async Task<List<User>> GetAllUsersWhoBookedRentalInTimePeriodAsync(Guid rentalId, DateTime startDate,
-        DateTime endDate)
-    {
-        return await ctx.Bookings
-            .Where(b => b.RentalId == rentalId && b.CheckIn >= startDate && b.CheckIn <= endDate)
-            .Select(b => b.User)
-            .ToListAsync();
+        if (options.RentalId != null)
+            query = query.Where(b => b.RentalId.Equals(options.RentalId));
+
+        if (options.UserId != null)
+            query = query.Where(b => b.UserId.Equals(options.UserId));
+
+        if (options.CheckIn != null)
+            query = query.Where(r => r.CheckIn >= options.CheckIn);
+
+        if (options.CheckOut != null)
+            query = query.Where(r => r.CheckOut <= options.CheckOut);
+
+        if (!options.Status.Equals(BookingStatus.All))
+            query = query.Where(r => r.Status.Equals(options.Status));
+
+        if (!string.IsNullOrEmpty(options.SortField))
+            query = options.SortOrder == SortOrder.Descending
+                ? query.OrderByDescending(u => EF.Property<object>(u, options.SortField))
+                : query.OrderBy(u => EF.Property<object>(u, options.SortField));
+
+        return await query.ToListAsync();
     }
 }
