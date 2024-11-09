@@ -2,6 +2,7 @@
 using PixelParadise.Application.Contracts.Responses;
 using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
+using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Application.Mapping;
 
@@ -11,8 +12,7 @@ public static class UserMapping
     {
         return new User(request.UserName, request.NickName, request.Email, request.Age);
     }
-    
-    // used for updating entities
+
     public static User MapToUser(this UpdateUserRequest request, Guid id)
     {
         return new User
@@ -33,16 +33,19 @@ public static class UserMapping
             UserName = user.Username,
             NickName = user.Nickname,
             Email = user.Email,
-            Age = user.Age,
+            Age = user.Age
         };
     }
 
 
-    public static UsersResponse MapToResponse(this IEnumerable<User> users)
+    public static UsersResponse MapToResponse(this PaginatedResult<User> users)
     {
         return new UsersResponse
         {
-            Users = users.Select(MapToResponse).ToList()
+            Items = users.Items,
+            Page = users.Page,
+            PageSize = users.PageSize,
+            Total = users.TotalCount
         };
     }
 
@@ -55,7 +58,9 @@ public static class UserMapping
             Email = request.Email,
             SortField = request.SortBy?.Trim('+', '-'),
             SortOrder = request.SortBy is null ? SortOrder.Unsorted :
-                request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending
+                request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending,
+            Page = request.Page,
+            PageSize = request.PageSize
         };
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
+using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Infrastructure.Repositories;
 
@@ -10,13 +11,13 @@ namespace PixelParadise.Infrastructure.Repositories;
 public interface IUserRepository : IRepository<User>
 {
     /// <summary>
-    ///     Asynchronously retrieves all users based on the specified options for filtering and sorting.
+    ///     Retrieves a list of users asynchronously based on given filtering and sorting options.
     /// </summary>
-    /// <param name="options">The options for filtering and sorting the user list.</param>
+    /// <param name="options">Criteria for filtering and sorting users.</param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains a list of users matching the criteria.
+    ///     A task representing the asynchronous operation, returning a paginated list of matching users.
     /// </returns>
-    Task<List<User>> GetAllAsync(GetAllUsersOptions options);
+    Task<PaginatedResult<User>> GetAllAsync(GetAllUsersOptions options);
 
     /// <summary>
     ///     Asynchronously retrieves a user by their username.
@@ -37,7 +38,7 @@ public interface IUserRepository : IRepository<User>
 public class UserRepository(PixelParadiseContext ctx) : Repository<User>(ctx), IUserRepository
 {
     /// <inheritdoc />
-    public async Task<List<User>> GetAllAsync(GetAllUsersOptions options)
+    public async Task<PaginatedResult<User>> GetAllAsync(GetAllUsersOptions options)
     {
         var query = ctx.Users.AsQueryable();
 
@@ -54,8 +55,17 @@ public class UserRepository(PixelParadiseContext ctx) : Repository<User>(ctx), I
             query = options.SortOrder == SortOrder.Descending
                 ? query.OrderByDescending(u => EF.Property<object>(u, options.SortField))
                 : query.OrderBy(u => EF.Property<object>(u, options.SortField));
+        var totalCount = await query.CountAsync();
+        var skip = (options.Page - 1) * options.PageSize;
+        query = query.Skip(skip).Take(options.PageSize);
 
-        return await query.ToListAsync();
+        return new PaginatedResult<User>
+        {
+            Items = await query.ToListAsync(),
+            TotalCount = totalCount,
+            Page = options.Page,
+            PageSize = options.PageSize
+        };
     }
 
     /// <inheritdoc />

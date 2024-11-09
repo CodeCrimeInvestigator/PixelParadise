@@ -1,6 +1,7 @@
-﻿namespace PixelParadise.Application.Contracts.Responses;
+﻿using PixelParadise.Application.Contracts.User;
 
-public class UsersResponse
+namespace PixelParadise.Application.Contracts.Responses;
+
+public class UsersResponse : PagedResponse<Domain.Entities.User>
 {
-    public required IEnumerable<UserResponse> Users { get; init; } = [];
 }

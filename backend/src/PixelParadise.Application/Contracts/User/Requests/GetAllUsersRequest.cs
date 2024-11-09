@@ -1,6 +1,6 @@
 ﻿namespace PixelParadise.Application.Contracts.Requests;
 
-public class GetAllUsersRequest
+public class GetAllUsersRequest : PagedRequest
 {
     public string? Username { get; init; }
     public string? Nickname { get; init; }

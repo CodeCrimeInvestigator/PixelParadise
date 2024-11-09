@@ -1,6 +1,7 @@
 ﻿using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
 using PixelParadise.Infrastructure.Repositories;
+using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Application.Services;
 
@@ -41,14 +42,14 @@ public interface IUserService
     Task<User> GetUserAsync(Guid id);
 
     /// <summary>
-    ///     Asynchronously retrieves all users with optional filtering and sorting.
+    ///     Retrieves all users asynchronously with options for filtering and sorting.
     /// </summary>
-    /// <param name="options">The options for filtering and sorting the user list.</param>
+    /// <param name="options">The criteria used for filtering and sorting the list of users.</param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains a collection of users
-    ///     matching the specified criteria.
+    ///     A task representing the asynchronous operation, returning a paginated list of users
+    ///     that match the specified options.
     /// </returns>
-    Task<IEnumerable<User>> GetAllUsersAsync(GetAllUsersOptions options);
+    Task<PaginatedResult<User>> GetAllUsersAsync(GetAllUsersOptions options);
 
     /// <summary>
     ///     Asynchronously updates an existing user.
@@ -104,7 +105,7 @@ public class UserService(IUserRepository userRepository) : IUserService
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<User>> GetAllUsersAsync(GetAllUsersOptions options)
+    public async Task<PaginatedResult<User>> GetAllUsersAsync(GetAllUsersOptions options)
     {
         return await userRepository.GetAllAsync(options);
     }
