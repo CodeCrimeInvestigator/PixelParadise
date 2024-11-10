@@ -2,6 +2,6 @@
 
 namespace PixelParadise.Application.Contracts.Responses;
 
-public class UsersResponse : PagedResponse<Domain.Entities.User>
+public class UsersResponse : PagedResponse<UserResponse>
 {
 }

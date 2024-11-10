@@ -1,6 +1,7 @@
-﻿namespace PixelParadise.Application.Contracts.Booking.Responses;
+﻿using PixelParadise.Application.Contracts.User;
 
-public class BookingsResponse
+namespace PixelParadise.Application.Contracts.Booking.Responses;
+
+public class BookingsResponse : PagedResponse<BookingResponse>
 {
-    public List<BookingResponse> Bookings { get; init; } = [];
 }

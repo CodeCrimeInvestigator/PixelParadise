@@ -1,6 +1,7 @@
 ﻿using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
 using PixelParadise.Infrastructure.Repositories;
+using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Application.Services;
 
@@ -28,14 +29,14 @@ public interface IBookingService
     Task<Booking?> GetBookingAsync(Guid id);
 
     /// <summary>
-    ///     Asynchronously retrieves all bookings with optional filtering and sorting.
+    ///     Asynchronously retrieves a paginated result of bookings with optional filtering and sorting criteria.
     /// </summary>
-    /// <param name="options">The options for filtering and sorting the booking list.</param>
+    /// <param name="options">The options for filtering, sorting, and pagination of the booking list.</param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains a list of bookings matching the
-    ///     specified criteria.
+    ///     A task that represents the asynchronous operation. The task result contains a <see cref="PaginatedResult{T}" />
+    ///     of bookings that match the specified criteria.
     /// </returns>
-    Task<List<Booking>> GetAllBookingsAsync(GetAllBookingOptions options);
+    Task<PaginatedResult<Booking>> GetAllBookingsAsync(GetAllBookingOptions options);
 
     /// <summary>
     ///     Asynchronously updates an existing booking.
@@ -74,7 +75,7 @@ public class BookingService(IBookingRepository bookingRepository) : IBookingServ
     }
 
     /// <inheritdoc />
-    public async Task<List<Booking>> GetAllBookingsAsync(GetAllBookingOptions options)
+    public async Task<PaginatedResult<Booking>> GetAllBookingsAsync(GetAllBookingOptions options)
     {
         return await bookingRepository.GetAllAsync(options);
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
+using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Infrastructure.Repositories;
 
@@ -9,7 +10,14 @@ namespace PixelParadise.Infrastructure.Repositories;
 /// </summary>
 public interface IBookingRepository : IRepository<Booking>
 {
-    Task<List<Booking>> GetAllAsync(GetAllBookingOptions options);
+    /// <summary>
+    ///     Retrieves a list of bookings asynchronously based on given filtering and sorting options.
+    /// </summary>
+    /// <param name="options">Criteria for filtering and sorting bookings.</param>
+    /// <returns>
+    ///     A task representing the asynchronous operation, returning a paginated list of matching bookings.
+    /// </returns>
+    Task<PaginatedResult<Booking>> GetAllAsync(GetAllBookingOptions options);
 }
 
 /// <summary>
@@ -17,7 +25,7 @@ public interface IBookingRepository : IRepository<Booking>
 /// </summary>
 public class BookingRepository(PixelParadiseContext ctx) : Repository<Booking>(ctx), IBookingRepository
 {
-    public async Task<List<Booking>> GetAllAsync(GetAllBookingOptions options)
+    public async Task<PaginatedResult<Booking>> GetAllAsync(GetAllBookingOptions options)
     {
         var query = ctx.Bookings.AsQueryable();
 
@@ -41,6 +49,16 @@ public class BookingRepository(PixelParadiseContext ctx) : Repository<Booking>(c
                 ? query.OrderByDescending(u => EF.Property<object>(u, options.SortField))
                 : query.OrderBy(u => EF.Property<object>(u, options.SortField));
 
-        return await query.ToListAsync();
+        var totalCount = await query.CountAsync();
+        var skip = (options.Page - 1) * options.PageSize;
+        query = query.Skip(skip).Take(options.PageSize);
+
+        return new PaginatedResult<Booking>
+        {
+            Items = await query.ToListAsync(),
+            TotalCount = totalCount,
+            Page = options.Page,
+            PageSize = options.PageSize
+        };
     }
 }

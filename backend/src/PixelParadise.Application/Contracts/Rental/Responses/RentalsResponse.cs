@@ -1,6 +1,7 @@
-﻿namespace PixelParadise.Application.Contracts.Rental.Responses;
+﻿using PixelParadise.Application.Contracts.User;
 
-public class RentalsResponse
+namespace PixelParadise.Application.Contracts.Rental.Responses;
+
+public class RentalsResponse : PagedResponse<RentalResponse>
 {
-    public required List<RentalResponse> Rentals { get; init; } = [];
 }

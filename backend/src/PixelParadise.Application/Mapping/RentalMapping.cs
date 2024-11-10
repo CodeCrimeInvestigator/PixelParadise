@@ -2,6 +2,7 @@
 using PixelParadise.Application.Contracts.Rental.Responses;
 using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
+using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Application.Mapping;
 
@@ -53,15 +54,20 @@ public static class RentalMapping
             OwnerUsername = request.OwnerUsername,
             SortField = request.SortBy?.Trim('+', '-'),
             SortOrder = request.SortBy is null ? SortOrder.Unsorted :
-                request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending
+                request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending,
+            Page = request.Page,
+            PageSize = request.PageSize
         };
     }
 
-    public static RentalsResponse MapToResponse(this IEnumerable<Rental> rentals)
+    public static RentalsResponse MapToResponse(this PaginatedResult<Rental> rentals)
     {
         return new RentalsResponse
         {
-            Rentals = rentals.Select(MapToResponse).ToList()
+            Items = rentals.Items.Select(MapToResponse).ToList(),
+            Page = rentals.Page,
+            PageSize = rentals.PageSize,
+            Total = rentals.TotalCount
         };
     }
 }

@@ -7,5 +7,7 @@ public class GetAllRentalsRequest
     public int? PriceLowerLimit { get; set; }
     public int? PriceUpperLimit { get; set; }
     public string? OwnerUsername { get; set; }
-    public string? SortBy { get; init; }
+    public string? SortBy { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
 }

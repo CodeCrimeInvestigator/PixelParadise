@@ -1,6 +1,7 @@
 ﻿using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
 using PixelParadise.Infrastructure.Repositories;
+using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Application.Services;
 
@@ -28,14 +29,14 @@ public interface IRentalService
     Task<Rental?> GetRentalAsync(Guid id);
 
     /// <summary>
-    ///     Asynchronously retrieves all rentals with optional filtering and sorting.
+    ///     Asynchronously retrieves a paginated result of rentals with optional filtering and sorting criteria.
     /// </summary>
-    /// <param name="options">The options for filtering and sorting the rental list.</param>
+    /// <param name="options">The options for filtering, sorting, and pagination of the rentals list.</param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains a list of rentals matching the
-    ///     specified criteria.
+    ///     A task that represents the asynchronous operation. The task result contains a <see cref="PaginatedResult{T}" />
+    ///     of rentals that match the specified criteria.
     /// </returns>
-    Task<List<Rental>> GetAllRentalsAsync(GetAllRentalOptions options);
+    Task<PaginatedResult<Rental>> GetAllRentalsAsync(GetAllRentalOptions options);
 
     /// <summary>
     ///     Asynchronously updates an existing rental.
@@ -74,7 +75,7 @@ public class RentalService(IRentalRepository repository) : IRentalService
     }
 
     /// <inheritdoc />
-    public async Task<List<Rental>> GetAllRentalsAsync(GetAllRentalOptions options)
+    public async Task<PaginatedResult<Rental>> GetAllRentalsAsync(GetAllRentalOptions options)
     {
         return await repository.GetAllAsync(options);
     }

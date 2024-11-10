@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
+using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Infrastructure.Repositories;
 
@@ -11,11 +12,13 @@ namespace PixelParadise.Infrastructure.Repositories;
 public interface IRentalRepository : IRepository<Rental>
 {
     /// <summary>
-    ///     Retrieves a list of all <see cref="Rental" /> entities that match the specified filtering options.
+    ///     Retrieves a list of rentals asynchronously based on given filtering and sorting options.
     /// </summary>
-    /// <param name="options">The filtering and sorting options for retrieving rentals.</param>
-    /// <returns>A list of <see cref="Rental" /> entities matching the provided options.</returns>
-    Task<List<Rental>> GetAllAsync(GetAllRentalOptions options);
+    /// <param name="options">Criteria for filtering and sorting rentals.</param>
+    /// <returns>
+    ///     A task representing the asynchronous operation, returning a paginated list of matching rentals.
+    /// </returns>
+    Task<PaginatedResult<Rental>> GetAllAsync(GetAllRentalOptions options);
 }
 
 /// <summary>
@@ -25,7 +28,7 @@ public interface IRentalRepository : IRepository<Rental>
 public class RentalRepository(PixelParadiseContext ctx) : Repository<Rental>(ctx), IRentalRepository
 {
     /// <inheritdoc />
-    public async Task<List<Rental>> GetAllAsync(GetAllRentalOptions options)
+    public async Task<PaginatedResult<Rental>> GetAllAsync(GetAllRentalOptions options)
     {
         var query = ctx.Rentals.AsQueryable();
 
@@ -46,6 +49,16 @@ public class RentalRepository(PixelParadiseContext ctx) : Repository<Rental>(ctx
                 ? query.OrderByDescending(u => EF.Property<object>(u, options.SortField))
                 : query.OrderBy(u => EF.Property<object>(u, options.SortField));
 
-        return await query.ToListAsync();
+        var totalCount = await query.CountAsync();
+        var skip = (options.Page - 1) * options.PageSize;
+        query = query.Skip(skip).Take(options.PageSize);
+
+        return new PaginatedResult<Rental>
+        {
+            Items = await query.ToListAsync(),
+            TotalCount = totalCount,
+            Page = options.Page,
+            PageSize = options.PageSize
+        };
     }
 }

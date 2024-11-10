@@ -2,6 +2,7 @@
 using PixelParadise.Application.Contracts.Booking.Responses;
 using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
+using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Application.Mapping;
 
@@ -46,15 +47,20 @@ public static class BookingMapping
             Status = request.Status is null ? BookingStatus.All : Enum.Parse<BookingStatus>(request.Status),
             SortField = request.SortBy?.Trim('+', '-'),
             SortOrder = request.SortBy is null ? SortOrder.Unsorted :
-                request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending
+                request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending,
+            Page = request.Page,
+            PageSize = request.PageSize
         };
     }
-    
-    public static BookingsResponse MapToResponse(this IEnumerable<Booking> bookings)
+
+    public static BookingsResponse MapToResponse(this PaginatedResult<Booking> bookings)
     {
         return new BookingsResponse
         {
-            Bookings = bookings.Select(MapToResponse).ToList()
+            Items = bookings.Items.Select(MapToResponse).ToList(),
+            Page = bookings.Page,
+            PageSize = bookings.PageSize,
+            Total = bookings.TotalCount
         };
     }
 }

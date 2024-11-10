@@ -42,7 +42,7 @@ public static class UserMapping
     {
         return new UsersResponse
         {
-            Items = users.Items,
+            Items = users.Items.Select(MapToResponse).ToList(),
             Page = users.Page,
             PageSize = users.PageSize,
             Total = users.TotalCount
