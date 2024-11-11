@@ -1,10 +1,13 @@
 ﻿using System.Data;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using PixelParadise.Application.Mapping;
 using PixelParadise.Application.Options;
 using PixelParadise.Application.Services;
 using PixelParadise.Infrastructure;
 using PixelParadise.Infrastructure.Repositories;
+using PixelParadise.Infrastructure.Validators;
 
 namespace PixelParadise.Application;
 
@@ -57,6 +60,9 @@ public class Startup
         services.AddSingleton<IBookingRepository, BookingRepository>();
         services.AddSingleton<IBookingService, BookingService>();
 
+        // add validators
+        services.AddValidatorsFromAssemblyContaining<UserValidator>(ServiceLifetime.Singleton);
+
         if (_startupOptions.EnableSwagger)
             services.AddSwaggerGen(c =>
             {
@@ -102,6 +108,7 @@ public class Startup
             });
         }
 
+        app.UseMiddleware<ValidationMappingMiddleware>();
         app.MapControllers();
     }
 }

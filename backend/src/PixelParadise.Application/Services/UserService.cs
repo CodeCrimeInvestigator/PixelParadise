@@ -1,4 +1,5 @@
-﻿using PixelParadise.Domain.Entities;
+﻿using FluentValidation;
+using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
 using PixelParadise.Infrastructure.Repositories;
 using PixelParadise.Infrastructure.Repositories.Results;
@@ -75,20 +76,12 @@ public interface IUserService
 /// <summary>
 ///     Provides implementation for user-related operations.
 /// </summary>
-public class UserService(IUserRepository userRepository) : IUserService
+public class UserService(IUserRepository userRepository, IValidator<User> validator) : IUserService
 {
     /// <inheritdoc />
     public async Task<EntityCreationResult<User>> CreateUserAsync(User user)
     {
-        var userExist = await userRepository.GetByUsernameAsync(user.Username);
-        if (userExist != null)
-            return new EntityCreationResult<User>
-            {
-                Success = false,
-                Message = "User with that username already exists!",
-                Entity = null
-            };
-
+        await validator.ValidateAndThrowAsync(user);
         var newUser = await userRepository.CreateAsync(user);
         return new EntityCreationResult<User>
         {
@@ -113,6 +106,7 @@ public class UserService(IUserRepository userRepository) : IUserService
     /// <inheritdoc />
     public async Task<User> UpdateUser(User user)
     {
+        await validator.ValidateAndThrowAsync(user);
         var userExist = await userRepository.GetAsync(user.Id);
         if (userExist == null) return null;
 
