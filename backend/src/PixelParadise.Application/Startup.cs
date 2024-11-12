@@ -62,7 +62,9 @@ public class Startup
 
         // add validators
         services.AddValidatorsFromAssemblyContaining<UserValidator>(ServiceLifetime.Singleton);
-
+        services.AddValidatorsFromAssemblyContaining<RentalValidator>(ServiceLifetime.Singleton);
+        services.AddValidatorsFromAssemblyContaining<BookingValidator>(ServiceLifetime.Singleton);
+            
         if (_startupOptions.EnableSwagger)
             services.AddSwaggerGen(c =>
             {

@@ -1,4 +1,5 @@
-﻿using PixelParadise.Domain.Entities;
+﻿using FluentValidation;
+using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
 using PixelParadise.Infrastructure.Repositories;
 using PixelParadise.Infrastructure.Repositories.Results;
@@ -60,12 +61,13 @@ public interface IRentalService
 /// <summary>
 ///     Provides implementation for rental-related operations.
 /// </summary>
-public class RentalService(IRentalRepository repository) : IRentalService
+public class RentalService(IRentalRepository repository, IValidator<Rental> validator) : IRentalService
 {
     /// <inheritdoc />
     public async Task<Rental> CreateRentalAsync(Rental rental)
     {
-        return await repository.CreateAsync(rental);
+        await validator.ValidateAndThrowAsync(rental);
+        return null;
     }
 
     /// <inheritdoc />
@@ -83,6 +85,7 @@ public class RentalService(IRentalRepository repository) : IRentalService
     /// <inheritdoc />
     public async Task<Rental> UpdateRentalAsync(Rental rental)
     {
+        await validator.ValidateAndThrowAsync(rental);
         return await repository.UpdateAsync(rental.Id, rental);
     }
 

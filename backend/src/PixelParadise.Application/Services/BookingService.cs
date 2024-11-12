@@ -1,4 +1,5 @@
-﻿using PixelParadise.Domain.Entities;
+﻿using FluentValidation;
+using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
 using PixelParadise.Infrastructure.Repositories;
 using PixelParadise.Infrastructure.Repositories.Results;
@@ -60,11 +61,12 @@ public interface IBookingService
 /// <summary>
 ///     Provides implementation for booking-related operations.
 /// </summary>
-public class BookingService(IBookingRepository bookingRepository) : IBookingService
+public class BookingService(IBookingRepository bookingRepository, IValidator<Booking> validator) : IBookingService
 {
     /// <inheritdoc />
     public async Task<Booking> CreateBookingAsync(Booking booking)
     {
+        await validator.ValidateAndThrowAsync(booking);
         return await bookingRepository.CreateAsync(booking);
     }
 
