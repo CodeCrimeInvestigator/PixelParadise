@@ -15,9 +15,7 @@ public class UserValidator : AbstractValidator<User>
     {
         _userRepository = userRepository;
 
-
         RuleFor(user => user.Username)
-            .NotEmpty()
             .MaximumLength(255)
             .MustAsync(ValidateUsername)
             .WithMessage("This Username is already taken");

@@ -19,18 +19,13 @@ public interface IUserService
     ///     that does not already exist in the system.
     /// </param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains an
-    ///     <see cref="EntityCreationResult{User}" /> object, which provides the result of the creation attempt:
-    ///     - <c>Success</c>: Indicates whether the user creation was successful.
-    ///     - <c>Message</c>: Provides a message regarding the outcome, e.g., success or error message if the username already
-    ///     exists.
-    ///     - <c>Entity</c>: The created user entity if successful; otherwise, null.
+    ///     A task that represents the asynchronous operation. The task result contains the created user entity if 
+    ///     successful; otherwise, an exception may be thrown if validation fails.
     /// </returns>
     /// <remarks>
-    ///     If the provided username already exists in the system, the method will return an unsuccessful result with a message
-    ///     indicating that the username is already taken.
+    ///     If the provided username already exists in the system, a validation exception will be thrown.
     /// </remarks>
-    Task<EntityCreationResult<User>> CreateUserAsync(User user);
+    Task<User> CreateUserAsync(User user);
 
     /// <summary>
     ///     Asynchronously retrieves a user by their unique identifier.
@@ -79,16 +74,10 @@ public interface IUserService
 public class UserService(IUserRepository userRepository, IValidator<User> validator) : IUserService
 {
     /// <inheritdoc />
-    public async Task<EntityCreationResult<User>> CreateUserAsync(User user)
+    public async Task<User> CreateUserAsync(User user)
     {
         await validator.ValidateAndThrowAsync(user);
-        var newUser = await userRepository.CreateAsync(user);
-        return new EntityCreationResult<User>
-        {
-            Success = true,
-            Message = "User created!",
-            Entity = newUser
-        };
+        return await userRepository.CreateAsync(user);
     }
 
     /// <inheritdoc />

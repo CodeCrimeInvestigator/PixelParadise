@@ -25,11 +25,7 @@ public class UserController(IUserService userService) : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
     {
         var user = request.MapToUser();
-        var entityCreationResult = await userService.CreateUserAsync(user);
-        if (!entityCreationResult.Success)
-        {
-            return BadRequest(entityCreationResult.Message);
-        }
+        await userService.CreateUserAsync(user);
         var userResponse = user.MapToResponse();
         return CreatedAtAction(nameof(Get), new { userId = user.Id }, userResponse);
     }
