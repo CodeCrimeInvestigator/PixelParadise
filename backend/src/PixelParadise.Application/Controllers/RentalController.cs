@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PixelParadise.Application.Contracts.Rental.Requests;
+using PixelParadise.Application.Contracts.Rental.Responses;
+using PixelParadise.Application.Contracts.Responses;
 using PixelParadise.Application.Mapping;
 using PixelParadise.Application.Services;
 
@@ -7,21 +9,24 @@ namespace PixelParadise.Application.Controllers;
 
 /// <summary>
 ///     Provides API endpoints for managing rental-related operations.
-///     This controller handles HTTP requests related to rentals, such as creating, retrieving, updating, and deleting rental
+///     This controller handles HTTP requests related to rentals, such as creating, retrieving, updating, and deleting
+///     rental
 ///     information.
 /// </summary>
 [ApiController]
 public class RentalController(IRentalService rentalService) : ControllerBase
 {
     /// <summary>
-    ///     Creates a new rental.
+    ///     Creates a new rental based on the provided request data.
     /// </summary>
     /// <param name="request">The request containing details for the rental to create.</param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result is an <see cref="IActionResult" />
-    ///     that indicates the result of the operation.
+    ///     An <see cref="IActionResult" /> with status 201 Created and the created rental data if successful,
+    ///     or 400 Bad Request if validation fails.
     /// </returns>
     [HttpPost(ApiEndpoints.Rentals.Create)]
+    [ProducesResponseType(typeof(RentalResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateRentalRequest request)
     {
         var rental = request.MapToRental();
@@ -35,10 +40,12 @@ public class RentalController(IRentalService rentalService) : ControllerBase
     /// </summary>
     /// <param name="rentalId">The unique identifier of the rental to retrieve.</param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result is an <see cref="IActionResult" />
-    ///     that contains the rental if found; otherwise, a <see cref="NotFoundResult" />.
+    ///     An <see cref="IActionResult" /> with status 200 OK and the rental data if found,
+    ///     or 404 Not Found if the rental does not exist.
     /// </returns>
     [HttpGet(ApiEndpoints.Rentals.Get)]
+    [ProducesResponseType(typeof(RentalResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] Guid rentalId)
     {
         var rental = await rentalService.GetRentalAsync(rentalId);
@@ -46,16 +53,16 @@ public class RentalController(IRentalService rentalService) : ControllerBase
         var rentalResponse = rental.MapToResponse();
         return Ok(rentalResponse);
     }
-    
+
     /// <summary>
-    ///     Retrieves all rentals, with optional filtering and sorting.
+    ///     Retrieves all rentals with optional filtering and sorting.
     /// </summary>
     /// <param name="request">The request containing optional filtering and sorting criteria.</param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result is an <see cref="IActionResult" />
-    ///     that contains a list of rentals.
+    ///     An <see cref="IActionResult" /> with status 200 OK and a list of rentals that match the criteria.
     /// </returns>
     [HttpGet(ApiEndpoints.Rentals.GetAll)]
+    [ProducesResponseType(typeof(RentalsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] GetAllRentalsRequest? request)
     {
         var searchOptions = request.MapToOptions();
@@ -64,16 +71,20 @@ public class RentalController(IRentalService rentalService) : ControllerBase
         return Ok(rentalsResponse);
     }
 
+
     /// <summary>
-    ///     Updates an existing rental by its unique identifier.
+    ///     Updates an existing rental based on the provided rental ID and request data.
     /// </summary>
     /// <param name="rentalId">The unique identifier of the rental to update.</param>
     /// <param name="request">The request containing updated rental details.</param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result is an <see cref="IActionResult" />
-    ///     that contains the updated rental if successful; otherwise, a <see cref="NotFoundResult" />.
+    ///     An <see cref="IActionResult" /> with status 200 OK and the updated rental data if successful,
+    ///     or 404 Not Found if the rental does not exist, or 400 Bad Request if validation fails.
     /// </returns>
     [HttpPut(ApiEndpoints.Rentals.Update)]
+    [ProducesResponseType(typeof(RentalResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromRoute] Guid rentalId, [FromBody] UpdateRentalRequest request)
     {
         var rental = request.MapToRental(rentalId);
@@ -83,15 +94,18 @@ public class RentalController(IRentalService rentalService) : ControllerBase
         return Ok(response);
     }
 
+
     /// <summary>
     ///     Deletes a rental by its unique identifier.
     /// </summary>
     /// <param name="rentalId">The unique identifier of the rental to delete.</param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result is an <see cref="IActionResult" />
-    ///     that indicates whether the deletion was successful.
+    ///     An <see cref="IActionResult" /> with status 200 OK if the rental was successfully deleted,
+    ///     or 404 Not Found if the rental does not exist.
     /// </returns>
     [HttpDelete(ApiEndpoints.Rentals.Delete)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete([FromRoute] Guid rentalId)
     {
         var deleted = await rentalService.DeleteRentalAsync(rentalId);
