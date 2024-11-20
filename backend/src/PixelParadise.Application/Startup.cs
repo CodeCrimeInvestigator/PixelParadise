@@ -2,12 +2,15 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 using PixelParadise.Application.Mapping;
 using PixelParadise.Application.Options;
 using PixelParadise.Application.Services;
 using PixelParadise.Infrastructure;
 using PixelParadise.Infrastructure.Repositories;
 using PixelParadise.Infrastructure.Validators;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace PixelParadise.Application;
 
@@ -18,13 +21,14 @@ namespace PixelParadise.Application;
 public class Startup
 {
     private readonly IConfiguration _configuration;
+    private readonly ILogger _logger;
     private readonly PostgreSqlOptions _postgreSqlOptions;
     private readonly StartupOptions _startupOptions;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="Startup" /> class.
     /// </summary>
-    public Startup(IConfiguration configuration)
+    public Startup(IConfiguration configuration, ILogger logger)
     {
         _configuration = configuration;
         _postgreSqlOptions = _configuration.GetSection("PostgreSqlOptions").Get<PostgreSqlOptions>() ??
@@ -33,6 +37,7 @@ public class Startup
         _startupOptions = _configuration.GetSection("StartupOptions").Get<StartupOptions>() ??
                           throw new InvalidConstraintException(
                               "The `Startup` section is not defined in the configuration.");
+        _logger = logger;
     }
 
     /// <summary>
@@ -64,7 +69,7 @@ public class Startup
         services.AddValidatorsFromAssemblyContaining<UserValidator>(ServiceLifetime.Singleton);
         services.AddValidatorsFromAssemblyContaining<RentalValidator>(ServiceLifetime.Singleton);
         services.AddValidatorsFromAssemblyContaining<BookingValidator>(ServiceLifetime.Singleton);
-            
+
         if (_startupOptions.EnableSwagger)
             services.AddSwaggerGen(c =>
             {
@@ -79,6 +84,21 @@ public class Startup
     }
 
     /// <summary>
+    ///     Configures the host settings for the application.
+    ///     This method sets up the logging configuration for the application using Serilog.
+    /// </summary>
+    /// <param name="host">The host builder to configure.</param>
+    public void ConfigureHost(ConfigureHostBuilder host)
+    {
+        host.UseSerilog((context, _, loggerConfiguration) =>
+        {
+            loggerConfiguration
+                .ReadFrom.Configuration(context.Configuration)
+                .Enrich.FromLogContext();
+        });
+    }
+
+    /// <summary>
     ///     Configures the application request pipeline.
     ///     This method is called by the runtime to configure the HTTP request pipeline.
     /// </summary>
@@ -87,19 +107,47 @@ public class Startup
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task Configure(WebApplication app, IWebHostEnvironment builderEnvironment)
     {
-        using (var scope = app.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<PixelParadiseContext>();
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseCors();
-                await context.Database.EnsureDeletedAsync();
-            }
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<PixelParadiseContext>();
 
-            await context.Database.EnsureCreatedAsync();
+        var retryCount = 0;
+        const int maxRetryCount = 3;
+        const int delaySeconds = 2;
+        var dbConnectionSuccessful = false;
+
+        while (retryCount < maxRetryCount && !dbConnectionSuccessful)
+            //TODO: extract this functionality to a separate class
+            try
+            {
+                await context.Database.EnsureCreatedAsync();
+                _logger.Information("Database connection successful.");
+                dbConnectionSuccessful = true;
+            }
+            catch (NpgsqlException ex)
+            {
+                retryCount++;
+                var delayTime = TimeSpan.FromSeconds(Math.Pow(delaySeconds, retryCount));
+                _logger.Error(
+                    $"Database connection failed. Attempt {retryCount} of {maxRetryCount}. Retrying in {delayTime.TotalSeconds} seconds.");
+                _logger.Verbose($"Exception details: {ex.Message}");
+
+                if (retryCount >= maxRetryCount)
+                {
+                    _logger.Fatal("Could not establish a connection to the database after several attempts.");
+                    Environment.Exit(1);
+                }
+
+                await Task.Delay(delayTime);
+            }
+        
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseCors();
+            await context.Database.EnsureDeletedAsync();
         }
 
         app.UsePathBase("/api");
+
         if (_startupOptions.EnableSwagger)
         {
             app.UseSwagger();
