@@ -93,6 +93,7 @@ public class Startup
         host.UseSerilog((context, _, loggerConfiguration) =>
         {
             loggerConfiguration
+                //TODO: include elastic search
                 .ReadFrom.Configuration(context.Configuration)
                 .Enrich.FromLogContext();
         });
@@ -114,6 +115,12 @@ public class Startup
         const int maxRetryCount = 3;
         const int delaySeconds = 2;
         var dbConnectionSuccessful = false;
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseCors();
+            await context.Database.EnsureDeletedAsync();
+        }
 
         while (retryCount < maxRetryCount && !dbConnectionSuccessful)
             //TODO: extract this functionality to a separate class
@@ -139,12 +146,6 @@ public class Startup
 
                 await Task.Delay(delayTime);
             }
-        
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseCors();
-            await context.Database.EnsureDeletedAsync();
-        }
 
         app.UsePathBase("/api");
 
