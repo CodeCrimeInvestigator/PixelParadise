@@ -2,15 +2,49 @@ version: '3.9'
 
 services:
   postgres:
+    container_name: postgres
     image: postgres:16
     ports:
       - 5432:5432
     volumes:
-      - pixelparadise-data:/var/lib/postgresql/data
+      - pixel-paradise-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=S3cret
       - POSTGRES_USER=pixelparadise_user
       - POSTGRES_DB=pixelparadise_db
+    networks:
+      - pixel-paradise-network
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:8.16.1
+    ports:
+      - 9200:9200
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+    volumes:
+        - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - pixel-paradise-network
+
+  kibana:
+    container_name: kibana
+    image: kibana:8.16.1
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_URL: http://localhost:9200
+      ELASTICSEARCH_HOSTS: http://localhost:9200
+    networks:
+      - pixel-paradise-network
 
 volumes:
-  pixelparadise-data:
+  pixel-paradise-data:
+  elasticsearch-data:
+
+networks:
+  pixel-paradise-network:
+    driver: bridge
