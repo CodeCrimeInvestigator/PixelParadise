@@ -1,15 +1,9 @@
 ﻿using System.Data;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using Npgsql;
+using PixelParadise.Application.Logging;
 using PixelParadise.Application.Mapping;
 using PixelParadise.Application.Options;
-using PixelParadise.Application.Services;
 using PixelParadise.Infrastructure;
-using PixelParadise.Infrastructure.Repositories;
-using PixelParadise.Infrastructure.Validators;
-using Serilog;
 using ILogger = Serilog.ILogger;
 
 namespace PixelParadise.Application;
@@ -48,55 +42,13 @@ public class Startup
     /// <param name="builderEnvironment">The hosting environment the application is running in.</param>
     public void ConfigureServices(IServiceCollection services, IWebHostEnvironment builderEnvironment)
     {
-        services.AddDbContext<PixelParadiseContext>(options =>
-            options.UseNpgsql(_postgreSqlOptions.GetConnectionString), ServiceLifetime.Singleton);
-
-        services.AddSingleton(typeof(IRepository<>), typeof(Repository<>));
-
-        // add user related services
-        services.AddSingleton<IUserRepository, UserRepository>();
-        services.AddSingleton<IUserService, UserService>();
-
-        // add rental related services
-        services.AddSingleton<IRentalService, RentalService>();
-        services.AddSingleton<IRentalRepository, RentalRepository>();
-
-        // add booking related services
-        services.AddSingleton<IBookingRepository, BookingRepository>();
-        services.AddSingleton<IBookingService, BookingService>();
-
-        // add validators
-        services.AddValidatorsFromAssemblyContaining<UserValidator>(ServiceLifetime.Singleton);
-        services.AddValidatorsFromAssemblyContaining<RentalValidator>(ServiceLifetime.Singleton);
-        services.AddValidatorsFromAssemblyContaining<BookingValidator>(ServiceLifetime.Singleton);
-
-        if (_startupOptions.EnableSwagger)
-            services.AddSwaggerGen(c =>
-            {
-                c.EnableAnnotations();
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PixelParadise API", Version = "v1" });
-
-                var filePath = Path.Combine(AppContext.BaseDirectory, "PixelParadise.xml");
-                c.IncludeXmlComments(filePath);
-            });
-
+        services.AddDbContext(_postgreSqlOptions);
+        services.AddRepositories();
+        services.AddServices();
+        services.AddValidators();
+        services.AddLogging(_configuration);
+        services.AddSwagger(_startupOptions);
         services.AddControllers();
-    }
-
-    /// <summary>
-    ///     Configures the host settings for the application.
-    ///     This method sets up the logging configuration for the application using Serilog.
-    /// </summary>
-    /// <param name="host">The host builder to configure.</param>
-    public void ConfigureHost(ConfigureHostBuilder host)
-    {
-        host.UseSerilog((context, _, loggerConfiguration) =>
-        {
-            loggerConfiguration
-                //TODO: include elastic search
-                .ReadFrom.Configuration(context.Configuration)
-                .Enrich.FromLogContext();
-        });
     }
 
     /// <summary>
@@ -116,6 +68,7 @@ public class Startup
         const int delaySeconds = 2;
         var dbConnectionSuccessful = false;
 
+        //TODO: extract logic to method
         if (app.Environment.IsDevelopment())
         {
             app.UseCors();

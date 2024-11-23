@@ -4,13 +4,14 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
 var initLogger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration, sectionName: "Serilog:Initialisation")
+    .MinimumLevel.Debug()
+    .WriteTo.Console(
+        outputTemplate:
+        "INITIALISATION LOGGER: [{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
-
 initLogger.Information("Starting the initialisation of Pixel Paradise... Registering Startup services...");
 var startup = new Startup(builder.Configuration, initLogger);
 startup.ConfigureServices(builder.Services, builder.Environment);
-startup.ConfigureHost(builder.Host);
 
 var app = builder.Build();
 await startup.Configure(app, builder.Environment);
