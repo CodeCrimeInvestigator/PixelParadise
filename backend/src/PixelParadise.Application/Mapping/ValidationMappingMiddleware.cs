@@ -1,5 +1,7 @@
-﻿using PixelParadise.Application.Contracts.Responses;
+﻿using Newtonsoft.Json;
+using PixelParadise.Application.Contracts.Responses;
 using ValidationException = FluentValidation.ValidationException;
+using ILogger = Serilog.ILogger;
 
 namespace PixelParadise.Application.Mapping;
 
@@ -8,6 +10,7 @@ namespace PixelParadise.Application.Mapping;
 /// </summary>
 public class ValidationMappingMiddleware(RequestDelegate next)
 {
+    private ILogger Logger => logger.ForContext<ValidationMappingMiddleware>();
     /// <summary>
     ///     Invokes the middleware and catches any <see cref="ValidationException" /> thrown during request processing.
     /// </summary>
@@ -22,7 +25,7 @@ public class ValidationMappingMiddleware(RequestDelegate next)
         catch (ValidationException e)
         {
             context.Response.StatusCode = 400;
-            var ValidationFailureResponse = new ValidationFailureResponse
+            var validationFailureResponse = new ValidationFailureResponse
             {
                 Errors = e.Errors.Select(x => new ValidationResponse
                 {
@@ -30,7 +33,10 @@ public class ValidationMappingMiddleware(RequestDelegate next)
                     Message = x.ErrorMessage
                 })
             };
-            await context.Response.WriteAsJsonAsync(ValidationFailureResponse);
+            
+            Logger.Error("Validation failure:{@ValidationResponse}", validationFailureResponse);
+
+            await context.Response.WriteAsJsonAsync(validationFailureResponse);
         }
     }
 }
