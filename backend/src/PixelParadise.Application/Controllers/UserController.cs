@@ -3,6 +3,7 @@ using PixelParadise.Application.Contracts.Requests;
 using PixelParadise.Application.Contracts.Responses;
 using PixelParadise.Application.Mapping;
 using PixelParadise.Application.Services;
+using ILogger = Serilog.ILogger;
 
 namespace PixelParadise.Application.Controllers;
 
@@ -12,8 +13,10 @@ namespace PixelParadise.Application.Controllers;
 ///     information.
 /// </summary>
 [ApiController]
-public class UserController(IUserService userService) : ControllerBase
+public class UserController(IUserService userService, ILogger logger) : ControllerBase
 {
+    private ILogger Logger => logger.ForContext<UserController>();
+
     /// <summary>
     ///     Creates a new user based on the provided request data.
     /// </summary>
@@ -27,9 +30,17 @@ public class UserController(IUserService userService) : ControllerBase
     [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
     {
+        Logger.Information("Received request to create user with data: {@RequestData}", request);
+        Logger.Debug("Request data: {@RequestData}", request);
         var user = request.MapToUser();
+
+        Logger.Debug("Mapped request to user entity: {@User}", user);
         await userService.CreateUserAsync(user);
+
+        Logger.Information("User successfully created with ID: {UserId}", user.Id);
         var userResponse = user.MapToResponse();
+
+        Logger.Debug("Response data prepared for created user. Response: {@UserResponse}", userResponse);
         return CreatedAtAction(nameof(Get), new { userId = user.Id }, userResponse);
     }
 
@@ -46,9 +57,17 @@ public class UserController(IUserService userService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] Guid userId)
     {
+        Logger.Information("Retrieve user request received. User ID: {UserId}", userId);
         var user = await userService.GetUserAsync(userId);
-        if (user == null) return NotFound();
+        if (user == null)
+        {
+            Logger.Warning("User not found with User ID: {UserId}", userId);
+            return NotFound();
+        }
+
+        Logger.Information("User found with User ID: {UserId}", userId);
         var userResponse = user.MapToResponse();
+        Logger.Debug("Response data prepared for retrieved user. Response: {@UserResponse}", userResponse);
         return Ok(userResponse);
     }
 
@@ -63,9 +82,12 @@ public class UserController(IUserService userService) : ControllerBase
     [ProducesResponseType(typeof(UsersResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] GetAllUsersRequest? request)
     {
+        Logger.Information("Retrieve all users request received. Filter Criteria: {@FilterCriteria}", request);
         var searchOptions = request.MapToOptions();
         var users = await userService.GetAllUsersAsync(searchOptions);
+        Logger.Information("Users retrieved successfully with UserCount: {UserCount}", users.TotalCount);
         var usersResponse = users.MapToResponse();
+        Logger.Debug("Response data prepared for all users. Response: {@UsersResponse}", usersResponse);
         return Ok(usersResponse);
     }
 
@@ -84,11 +106,19 @@ public class UserController(IUserService userService) : ControllerBase
     [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromRoute] Guid userId, [FromBody] UpdateUserRequest request)
     {
+        Logger.Information("Update user request received. User ID: {UserId}, Request Data: {@RequestData}", userId,
+            request);
         var user = request.MapToUser(userId);
         var updatedUser = await userService.UpdateUser(user);
-        if (updatedUser == null) return NotFound();
+        if (updatedUser == null)
+        {
+            Logger.Warning("Failed to update. User not found with User ID: {UserId}", userId);
+            return NotFound();
+        }
 
+        Logger.Information("User updated successfully with User ID: {UserId}", userId);
         var response = user.MapToResponse();
+        Logger.Debug("Response data prepared for updated user. Response: {@UserResponse}", response);
         return Ok(response);
     }
 
@@ -105,9 +135,15 @@ public class UserController(IUserService userService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete([FromRoute] Guid userId)
     {
+        Logger.Information("Delete user request received with User ID: {UserId}", userId);
         var deleted = await userService.DeleteUser(userId);
-        if (!deleted) return NotFound();
+        if (!deleted)
+        {
+            Logger.Warning("Failed to delete. User not found with User ID: {UserId}", userId);
+            return NotFound();
+        }
 
+        Logger.Information("User deleted successfully with User ID: {UserId}", userId);
         return Ok();
     }
 }

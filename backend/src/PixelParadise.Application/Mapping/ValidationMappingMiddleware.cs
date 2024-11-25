@@ -8,7 +8,7 @@ namespace PixelParadise.Application.Mapping;
 /// <summary>
 ///     Middleware for mapping validation exceptions to a standardized error response.
 /// </summary>
-public class ValidationMappingMiddleware(RequestDelegate next)
+public class ValidationMappingMiddleware(RequestDelegate next, ILogger logger)
 {
     private ILogger Logger => logger.ForContext<ValidationMappingMiddleware>();
     /// <summary>
