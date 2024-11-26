@@ -34,13 +34,12 @@ public class UserController(IUserService userService, ILogger logger) : Controll
         Logger.Debug("Request data: {@RequestData}", request);
         var user = request.MapToUser();
 
-        Logger.Debug("Mapped request to user entity: {@User}", user);
         await userService.CreateUserAsync(user);
-
         Logger.Information("User successfully created with ID: {UserId}", user.Id);
-        var userResponse = user.MapToResponse();
 
+        var userResponse = user.MapToResponse();
         Logger.Debug("Response data prepared for created user. Response: {@UserResponse}", userResponse);
+
         return CreatedAtAction(nameof(Get), new { userId = user.Id }, userResponse);
     }
 
@@ -67,6 +66,7 @@ public class UserController(IUserService userService, ILogger logger) : Controll
 
         Logger.Information("User found with User ID: {UserId}", userId);
         var userResponse = user.MapToResponse();
+
         Logger.Debug("Response data prepared for retrieved user. Response: {@UserResponse}", userResponse);
         return Ok(userResponse);
     }
@@ -85,8 +85,10 @@ public class UserController(IUserService userService, ILogger logger) : Controll
         Logger.Information("Retrieve all users request received. Filter Criteria: {@FilterCriteria}", request);
         var searchOptions = request.MapToOptions();
         var users = await userService.GetAllUsersAsync(searchOptions);
+
         Logger.Information("Users retrieved successfully with UserCount: {UserCount}", users.TotalCount);
         var usersResponse = users.MapToResponse();
+
         Logger.Debug("Response data prepared for all users. Response: {@UsersResponse}", usersResponse);
         return Ok(usersResponse);
     }
@@ -118,6 +120,7 @@ public class UserController(IUserService userService, ILogger logger) : Controll
 
         Logger.Information("User updated successfully with User ID: {UserId}", userId);
         var response = user.MapToResponse();
+
         Logger.Debug("Response data prepared for updated user. Response: {@UserResponse}", response);
         return Ok(response);
     }

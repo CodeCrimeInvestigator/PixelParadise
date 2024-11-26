@@ -4,6 +4,7 @@ using PixelParadise.Application.Contracts.Rental.Responses;
 using PixelParadise.Application.Contracts.Responses;
 using PixelParadise.Application.Mapping;
 using PixelParadise.Application.Services;
+using ILogger = Serilog.ILogger;
 
 namespace PixelParadise.Application.Controllers;
 
@@ -14,8 +15,10 @@ namespace PixelParadise.Application.Controllers;
 ///     information.
 /// </summary>
 [ApiController]
-public class RentalController(IRentalService rentalService) : ControllerBase
+public class RentalController(IRentalService rentalService, ILogger logger) : ControllerBase
 {
+    private ILogger Logger => logger.ForContext<RentalController>();
+
     /// <summary>
     ///     Creates a new rental based on the provided request data.
     /// </summary>
@@ -29,9 +32,16 @@ public class RentalController(IRentalService rentalService) : ControllerBase
     [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateRentalRequest request)
     {
+        Logger.Information("Received request to create rental with data: {@RequestData}", request);
+        Logger.Debug("Request data: {@RequestData}", request);
         var rental = request.MapToRental();
+
         await rentalService.CreateRentalAsync(rental);
+        Logger.Information("Rental successfully created with ID: {RentalId}", rental.Id);
+
         var rentalResponse = rental.MapToResponse();
+        Logger.Debug("Response data prepared for created rental. Response: {@RentalResponse}", rentalResponse);
+
         return CreatedAtAction(nameof(Get), new { rentalId = rental.Id }, rentalResponse);
     }
 
@@ -48,9 +58,18 @@ public class RentalController(IRentalService rentalService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] Guid rentalId)
     {
+        Logger.Information("Retrieve rental request received. Rental ID: {RentalId}", rentalId);
         var rental = await rentalService.GetRentalAsync(rentalId);
-        if (rental == null) return NotFound();
+        if (rental == null)
+        {
+            Logger.Warning("Rental not found with Rental ID: {RentalId}", rentalId);
+            return NotFound();
+        }
+
+        Logger.Information("Rental found with Rental ID: {RentalId}", rentalId);
         var rentalResponse = rental.MapToResponse();
+
+        Logger.Debug("Response data prepared for retrieved rental. Response: {@RentalResponse}", rentalResponse);
         return Ok(rentalResponse);
     }
 
@@ -65,9 +84,14 @@ public class RentalController(IRentalService rentalService) : ControllerBase
     [ProducesResponseType(typeof(RentalsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] GetAllRentalsRequest? request)
     {
+        Logger.Information("Retrieve all rentals request received. Filter Criteria: {@FilterCriteria}", request);
         var searchOptions = request.MapToOptions();
         var rentals = await rentalService.GetAllRentalsAsync(searchOptions);
+
+        Logger.Information("Rentals retrieved successfully with RentalCount: {RentalCount}", rentals.TotalCount);
         var rentalsResponse = rentals.MapToResponse();
+
+        Logger.Debug("Response data prepared for all rentals. Response: {@RentalsResponse}", rentalsResponse);
         return Ok(rentalsResponse);
     }
 
@@ -87,10 +111,20 @@ public class RentalController(IRentalService rentalService) : ControllerBase
     [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromRoute] Guid rentalId, [FromBody] UpdateRentalRequest request)
     {
+        Logger.Information("Update rental request received. Rental ID: {RentalId}, Request Data: {@RequestData}",
+            rentalId, request);
         var rental = request.MapToRental(rentalId);
         var updatedRental = await rentalService.UpdateRentalAsync(rental);
-        if (updatedRental == null) return NotFound();
+        if (updatedRental == null)
+        {
+            Logger.Warning("Failed to update. Rental not found with Rental ID: {RentalId}", rentalId);
+            return NotFound();
+        }
+
+        Logger.Information("Rental updated successfully with Rental ID: {RentalId}", rentalId);
         var response = updatedRental.MapToResponse();
+
+        Logger.Debug("Response data prepared for updated rental. Response: {@RentalResponse}", response);
         return Ok(response);
     }
 
@@ -108,8 +142,15 @@ public class RentalController(IRentalService rentalService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete([FromRoute] Guid rentalId)
     {
+        Logger.Information("Delete rental request received with Rental ID: {RentalId}", rentalId);
         var deleted = await rentalService.DeleteRentalAsync(rentalId);
-        if (!deleted) return NotFound();
+        if (!deleted)
+        {
+            Logger.Warning("Failed to delete. Rental not found with Rental ID: {RentalId}", rentalId);
+            return NotFound();
+        }
+
+        Logger.Information("Rental deleted successfully with Rental ID: {RentalId}", rentalId);
         return Ok();
     }
 }

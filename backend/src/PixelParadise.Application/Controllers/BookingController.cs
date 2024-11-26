@@ -5,6 +5,7 @@ using PixelParadise.Application.Contracts.Responses;
 using PixelParadise.Application.Mapping;
 using PixelParadise.Application.Services;
 using PixelParadise.Domain.Entities;
+using ILogger = Serilog.ILogger;
 
 namespace PixelParadise.Application.Controllers;
 
@@ -14,8 +15,10 @@ namespace PixelParadise.Application.Controllers;
 ///     booking information.
 /// </summary>
 [ApiController]
-public class BookingController(IBookingService bookingService) : ControllerBase
+public class BookingController(IBookingService bookingService, ILogger logger) : ControllerBase
 {
+    private ILogger Logger => logger.ForContext<BookingController>();
+
     /// <summary>
     ///     Creates a new booking based on the provided request data.
     /// </summary>
@@ -29,9 +32,16 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateBookingRequest request)
     {
+        Logger.Information("Received request to create booking with data: {@RequestData}", request);
+        Logger.Debug("Request data: {@RequestData}", request);
         var booking = request.MapToBooking();
+
         await bookingService.CreateBookingAsync(booking);
+        Logger.Information("Booking successfully created with ID: {BookingId}", booking.Id);
+
         var bookingResponse = booking.MapToResponse();
+        Logger.Debug("Response data prepared for created booking. Response: {@BookingResponse}", bookingResponse);
+
         return CreatedAtAction(nameof(Get), new { bookingId = booking.Id }, bookingResponse);
     }
 
@@ -48,9 +58,18 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] Guid bookingId)
     {
+        Logger.Information("Retrieve booking request received. Booking ID: {BookingId}", bookingId);
         var booking = await bookingService.GetBookingAsync(bookingId);
-        if (booking == null) return NotFound();
+        if (booking == null)
+        {
+            Logger.Warning("Booking not found with Booking ID: {BookingId}", bookingId);
+            return NotFound();
+        }
+
+        Logger.Information("Booking found with Booking ID: {BookingId}", bookingId);
         var bookingResponse = booking.MapToResponse();
+
+        Logger.Debug("Response data prepared for retrieved booking. Response: {@BookingResponse}", bookingResponse);
         return Ok(bookingResponse);
     }
 
@@ -65,9 +84,14 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     [ProducesResponseType(typeof(BookingsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] GetAllBookingRequest request)
     {
+        Logger.Information("Retrieve all bookings request received. Filter Criteria: {@FilterCriteria}", request);
         var bookingOptions = request.MapToOptions();
         var bookings = await bookingService.GetAllBookingsAsync(bookingOptions);
+
+        Logger.Information("Bookings retrieved successfully with BookingCount: {BookingCount}", bookings.TotalCount);
         var bookingsResponse = bookings.MapToResponse();
+
+        Logger.Debug("Response data prepared for all bookings. Response: {@BookingsResponse}", bookingsResponse);
         return Ok(bookingsResponse);
     }
 
@@ -87,14 +111,31 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     public async Task<IActionResult> Update([FromRoute] Guid bookingId, [FromBody] UpdateBookingRequest request)
     {
         //TODO: Make the update logic consistent across controllers!!!
+        Logger.Information("Update booking request received. Booking ID: {BookingId}, Request Data: {@RequestData}",
+            bookingId, request);
         var booking = await bookingService.GetBookingAsync(bookingId);
-        if (booking == null) return NotFound();
+        if (booking == null)
+        {
+            Logger.Warning("Failed to update. Booking not found with Booking ID: {BookingId}", bookingId);
+            return NotFound();
+        }
+
+        Logger.Debug("Retrieved booking for update. Current Booking: {@Booking}", booking);
 
         booking.Status = Enum.Parse<BookingStatus>(request.Status);
+        Logger.Debug("Updated booking status to: {Status}", request.Status);
 
         var updatedBooking = await bookingService.UpdateBookingAsync(booking);
-        if (updatedBooking == null) return NotFound();
+        if (updatedBooking == null)
+        {
+            Logger.Warning("Failed to update. Booking could not be updated with Booking ID: {BookingId}", bookingId);
+            return NotFound();
+        }
+
+        Logger.Information("Booking updated successfully with Booking ID: {BookingId}", bookingId);
         var response = updatedBooking.MapToResponse();
+
+        Logger.Debug("Response data prepared for updated booking. Response: {@BookingResponse}", response);
         return Ok(response);
     }
 
@@ -111,8 +152,15 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete([FromRoute] Guid bookingId)
     {
+        Logger.Information("Delete booking request received with Booking ID: {BookingId}", bookingId);
         var deleted = await bookingService.DeleteBookingAsync(bookingId);
-        if (!deleted) return NotFound();
+        if (!deleted)
+        {
+            Logger.Warning("Failed to delete. Booking not found with Booking ID: {BookingId}", bookingId);
+            return NotFound();
+        }
+
+        Logger.Information("Booking deleted successfully with Booking ID: {BookingId}", bookingId);
         return Ok();
     }
 }
