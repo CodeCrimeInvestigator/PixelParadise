@@ -41,7 +41,7 @@ public class BookingValidator : AbstractValidator<Booking>
     {
         var existingRental = await _rentalRepository.GetAsync(rentalId);
         if (existingRental != null)
-            return existingRental.Id == booking.UserId;
+            return existingRental.Id == booking.RentalId;
         return false;
     }
 }

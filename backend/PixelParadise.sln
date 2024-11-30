@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PixelParadise.Application",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PixelParadise.Infrastructure", "src\PixelParadise.Infrastructure\PixelParadise.Infrastructure.csproj", "{22CBCEFC-1864-4C35-B9B7-60E6310B4B68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PixelParadise.Test", "test\PixelParadise.Test\PixelParadise.Test.csproj", "{BC43E9E3-768A-4716-AB50-62E4F86CAB91}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PixelParadise.Tests.Unit", "test\PixelParadise.Tests.Unit\PixelParadise.Tests.Unit.csproj", "{BC43E9E3-768A-4716-AB50-62E4F86CAB91}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
