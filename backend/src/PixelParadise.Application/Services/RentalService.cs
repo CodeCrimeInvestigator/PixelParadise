@@ -67,10 +67,10 @@ public class RentalService(IRentalRepository repository, IValidator<Rental> vali
     public async Task<Rental> CreateRentalAsync(Rental rental)
     {
         await validator.ValidateAndThrowAsync(rental);
-        return null;
+        return await repository.CreateAsync(rental);;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc />SS
     public async Task<Rental?> GetRentalAsync(Guid id)
     {
         return await repository.GetAsync(id);
