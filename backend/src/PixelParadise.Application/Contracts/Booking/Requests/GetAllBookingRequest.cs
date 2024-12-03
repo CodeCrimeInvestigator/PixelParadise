@@ -1,6 +1,6 @@
 ﻿namespace PixelParadise.Application.Contracts.Booking.Requests;
 
-public class GetAllBookingRequest
+public class GetAllBookingRequest : PagedRequest
 {
     public Guid? RentalId { get; set; }
     public Guid? UserId { get; set; }
@@ -8,6 +8,4 @@ public class GetAllBookingRequest
     public DateTimeOffset? CheckOut { get; set; }
     public string? Status { get; set; }
     public string? SortBy { get; set; }
-    public int Page { get; set; }
-    public int PageSize { get; set; }
 }

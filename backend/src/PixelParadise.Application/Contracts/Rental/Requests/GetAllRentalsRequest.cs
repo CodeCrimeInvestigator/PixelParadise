@@ -1,6 +1,6 @@
 ﻿namespace PixelParadise.Application.Contracts.Rental.Requests;
 
-public class GetAllRentalsRequest
+public class GetAllRentalsRequest : PagedRequest
 {
     public string? Name { get; set; }
     public string? Description { get; set; }
@@ -8,6 +8,4 @@ public class GetAllRentalsRequest
     public int? PriceUpperLimit { get; set; }
     public string? OwnerUsername { get; set; }
     public string? SortBy { get; set; }
-    public int Page { get; set; }
-    public int PageSize { get; set; }
 }
