@@ -23,6 +23,7 @@ public static class ValidatorRegistrar
         services.AddValidatorsFromAssemblyContaining<UserValidator>(ServiceLifetime.Singleton);
         services.AddValidatorsFromAssemblyContaining<RentalValidator>(ServiceLifetime.Singleton);
         services.AddValidatorsFromAssemblyContaining<BookingValidator>(ServiceLifetime.Singleton);
+        services.AddValidatorsFromAssemblyContaining<ImageValidator>(ServiceLifetime.Singleton);
         return services;
     }
 }
