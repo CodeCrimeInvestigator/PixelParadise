@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using Microsoft.Extensions.Options;
+using PixelParadise.Application.Options;
 using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
 using PixelParadise.Infrastructure.Repositories;
@@ -19,7 +21,7 @@ public interface IUserService
     ///     that does not already exist in the system.
     /// </param>
     /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains the created user entity if 
+    ///     A task that represents the asynchronous operation. The task result contains the created user entity if
     ///     successful; otherwise, an exception may be thrown if validation fails.
     /// </returns>
     /// <remarks>
@@ -66,17 +68,32 @@ public interface IUserService
     ///     successful.
     /// </returns>
     Task<bool> DeleteUser(Guid id);
+
+    /// <summary>
+    ///     Asynchronously uploads a profile picture for a user.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user to upload the profile picture for.</param>
+    /// <param name="profilePicture">The profile picture file to upload. Can be null to reset the image.</param>
+    /// <returns>
+    ///     A task representing the asynchronous operation. The task result is true if the upload or reset was successful,
+    ///     or false if the user was not found or there was an error during the process.
+    /// </returns>
+    Task<bool> UploadProfilePictureAsync(Guid userId, IFormFile? profilePicture);
 }
 
 /// <summary>
 ///     Provides implementation for user-related operations.
 /// </summary>
-public class UserService(IUserRepository userRepository, IValidator<User> validator) : IUserService
+public class UserService(
+    IUserRepository userRepository,
+    IValidator<User> userValidator,
+    IValidator<IFormFile> imageValidator,
+    IOptions<StorageOptions> storageOptions) : IUserService
 {
     /// <inheritdoc />
     public async Task<User> CreateUserAsync(User user)
     {
-        await validator.ValidateAndThrowAsync(user);
+        await userValidator.ValidateAndThrowAsync(user);
         return await userRepository.CreateAsync(user);
     }
 
@@ -95,7 +112,7 @@ public class UserService(IUserRepository userRepository, IValidator<User> valida
     /// <inheritdoc />
     public async Task<User> UpdateUser(User user)
     {
-        await validator.ValidateAndThrowAsync(user);
+        await userValidator.ValidateAndThrowAsync(user);
         var userExist = await userRepository.GetAsync(user.Id);
         if (userExist == null) return null;
 
@@ -107,5 +124,41 @@ public class UserService(IUserRepository userRepository, IValidator<User> valida
     public async Task<bool> DeleteUser(Guid id)
     {
         return await userRepository.DeleteAsync(id);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> UploadProfilePictureAsync(Guid userId, IFormFile? profilePicture)
+    {
+        var user = await userRepository.GetAsync(userId);
+        if (user == null) return false;
+
+        if (profilePicture == null || profilePicture.Length == 0)
+        {
+            if (!string.IsNullOrEmpty(user.ProfileImageUrl) && File.Exists(user.ProfileImageUrl))
+                File.Delete(user.ProfileImageUrl);
+
+            user.ProfileImageUrl = storageOptions.Value.DefaultUserImagePath;
+            await userRepository.UpdateAsync(user.Id, user);
+
+            return true;
+        }
+
+        await imageValidator.ValidateAndThrowAsync(profilePicture);
+
+        var fileName = $"{userId}.png";
+        var filePath = Path.Combine(storageOptions.Value.StorageFolderPath, "user-images", fileName);
+
+        var directoryPath = Path.GetDirectoryName(filePath);
+        if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
+
+        await using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await profilePicture.CopyToAsync(stream);
+        }
+
+        user.ProfileImageUrl = filePath;
+        await userRepository.UpdateAsync(user.Id, user);
+
+        return true;
     }
 }

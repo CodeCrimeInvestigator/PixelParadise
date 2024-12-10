@@ -42,6 +42,7 @@ public class Startup
     /// <param name="builderEnvironment">The hosting environment the application is running in.</param>
     public void ConfigureServices(IServiceCollection services, IWebHostEnvironment builderEnvironment)
     {
+        services.Configure<StorageOptions>(_configuration.GetSection("StorageOptions"));
         services.AddDbContext(_postgreSqlOptions);
         services.AddRepositories();
         services.AddServices();

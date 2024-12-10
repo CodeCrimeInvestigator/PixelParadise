@@ -16,6 +16,7 @@ public static class ApiEndpoints
         public const string GetAll = Base;
         public const string Update = $"{Base}/{{userId:guid}}";
         public const string Delete = $"{Base}/{{userId:guid}}";
+        public const string UpdateImage = $"{Base}/{{userId:guid}}/images";
     }
 
     public static class Rentals
@@ -26,6 +27,7 @@ public static class ApiEndpoints
         public const string GetAll = Base;
         public const string Update = $"{Base}/{{rentalId:guid}}";
         public const string Delete = $"{Base}/{{rentalId:guid}}";
+        public const string GetImage = $"{Base}/{{rentalId:guid}}/cover-image";
     }
 
     public static class Bookings

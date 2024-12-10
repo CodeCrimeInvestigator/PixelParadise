@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using PixelParadise.Application.Contracts.Requests;
 using PixelParadise.Application.Contracts.Responses;
 using PixelParadise.Application.Mapping;
+using PixelParadise.Application.Options;
 using PixelParadise.Application.Services;
 using ILogger = Serilog.ILogger;
 
@@ -13,7 +15,7 @@ namespace PixelParadise.Application.Controllers;
 ///     information.
 /// </summary>
 [ApiController]
-public class UserController(IUserService userService, ILogger logger) : ControllerBase
+public class UserController(IUserService userService, IOptions<StorageOptions> options, ILogger logger) : ControllerBase
 {
     private ILogger Logger => logger.ForContext<UserController>();
 
@@ -32,7 +34,7 @@ public class UserController(IUserService userService, ILogger logger) : Controll
     {
         Logger.Information("Received request to create user with data: {@RequestData}", request);
         Logger.Debug("Request data: {@RequestData}", request);
-        var user = request.MapToUser();
+        var user = request.MapToUser(options);
 
         await userService.CreateUserAsync(user);
         Logger.Information("User successfully created with ID: {UserId}", user.Id);
@@ -148,5 +150,24 @@ public class UserController(IUserService userService, ILogger logger) : Controll
 
         Logger.Information("User deleted successfully with User ID: {UserId}", userId);
         return Ok();
+    }
+
+    /// <summary>
+    ///     Uploads a cover image for a user by their unique identifier.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="coverImage">The cover image to upload.</param>
+    /// <returns>
+    ///     An <see cref="IActionResult" /> with status 200 OK if successful,
+    ///     or 404 Not Found if the user does not exist.
+    /// </returns>
+    [HttpPost(ApiEndpoints.Users.UpdateImage)]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadCoverImage(Guid userId, IFormFile? coverImage)
+    {
+        var res = await userService.UploadProfilePictureAsync(userId, coverImage);
+        if (!res)
+            return NotFound("Failed to upload profile picture because there is no user with specified userId");
+        return Ok("Cover image uploaded successfully.");
     }
 }

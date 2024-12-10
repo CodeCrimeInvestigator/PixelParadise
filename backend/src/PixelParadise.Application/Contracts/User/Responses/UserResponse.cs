@@ -13,4 +13,6 @@ public class UserResponse
     public string Email { get; init; }
 
     public int Age { get; init; }
+    
+    public string ProfileImageUrl { get; init; }
 }

@@ -1,5 +1,7 @@
-﻿using PixelParadise.Application.Contracts.Requests;
+﻿using Microsoft.Extensions.Options;
+using PixelParadise.Application.Contracts.Requests;
 using PixelParadise.Application.Contracts.Responses;
+using PixelParadise.Application.Options;
 using PixelParadise.Domain.Entities;
 using PixelParadise.Domain.Options;
 using PixelParadise.Infrastructure.Repositories.Results;
@@ -8,9 +10,12 @@ namespace PixelParadise.Application.Mapping;
 
 public static class UserMapping
 {
-    public static User MapToUser(this CreateUserRequest request)
+    public static User MapToUser(this CreateUserRequest request, IOptions<StorageOptions> options)
     {
-        return new User(request.UserName, request.NickName, request.Email, request.Age);
+        return new User(request.UserName, request.NickName, request.Email, request.Age)
+        {
+            ProfileImageUrl = options.Value.DefaultUserImagePath
+        };
     }
 
     public static User MapToUser(this UpdateUserRequest request, Guid id)
@@ -33,7 +38,8 @@ public static class UserMapping
             UserName = user.Username,
             NickName = user.Nickname,
             Email = user.Email,
-            Age = user.Age
+            Age = user.Age,
+            ProfileImageUrl = user.ProfileImageUrl
         };
     }
 
