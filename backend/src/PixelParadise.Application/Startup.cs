@@ -63,44 +63,17 @@ public class Startup
     {
         using var scope = app.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<PixelParadiseContext>();
-
-        var retryCount = 0;
-        const int maxRetryCount = 3;
-        const int delaySeconds = 2;
-        var dbConnectionSuccessful = false;
-
+        
         //TODO: extract logic to method
         if (app.Environment.IsDevelopment())
         {
             app.UseCors();
             await context.Database.EnsureDeletedAsync();
         }
-
-        while (retryCount < maxRetryCount && !dbConnectionSuccessful)
-            //TODO: extract this functionality to a separate class
-            try
-            {
-                await context.Database.EnsureCreatedAsync();
-                _logger.Information("Database connection successful.");
-                dbConnectionSuccessful = true;
-            }
-            catch (NpgsqlException ex)
-            {
-                retryCount++;
-                var delayTime = TimeSpan.FromSeconds(Math.Pow(delaySeconds, retryCount));
-                _logger.Error(
-                    $"Database connection failed. Attempt {retryCount} of {maxRetryCount}. Retrying in {delayTime.TotalSeconds} seconds.");
-                _logger.Verbose($"Exception details: {ex.Message}");
-
-                if (retryCount >= maxRetryCount)
-                {
-                    _logger.Fatal("Could not establish a connection to the database after several attempts.");
-                    Environment.Exit(1);
-                }
-
-                await Task.Delay(delayTime);
-            }
-
+        
+        var databaseInitializer = new DatabaseInitializer(context, _logger, builderEnvironment);
+        await databaseInitializer.InitializeDatabaseAsync();
+        
         app.UsePathBase("/api");
 
         if (_startupOptions.EnableSwagger)
