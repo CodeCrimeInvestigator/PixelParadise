@@ -1,6 +1,6 @@
-﻿namespace PixelParadise.Application.Contracts.Rental.Requests;
+﻿namespace PixelParadise.Application.Contracts.Accommodation.Requests;
 
-public class GetAllRentalsRequest : PagedRequest
+public class GetAllAccommodationsRequest : PagedRequest
 {
     public string? Name { get; set; }
     public string? Description { get; set; }

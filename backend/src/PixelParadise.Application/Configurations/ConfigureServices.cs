@@ -15,13 +15,13 @@ public static class ConfigureServices
     /// <remarks>
     ///     This method registers the following application services with singleton lifetimes:
     ///     - User-related service (`IUserService`)
-    ///     - Rental-related service (`IRentalService`)
+    ///     - Accommodation-related service (`IAccommodationService`)
     ///     - Booking-related service (`IBookingService`)
     /// </remarks>
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IUserService, UserService>();
-        services.AddSingleton<IRentalService, RentalService>();
+        services.AddSingleton<IAccommodationService, AccommodationService>();
         services.AddSingleton<IBookingService, BookingService>();
         return services;
     }

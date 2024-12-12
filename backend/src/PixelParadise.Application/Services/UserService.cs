@@ -78,7 +78,7 @@ public interface IUserService
     ///     A task representing the asynchronous operation. The task result is true if the upload or reset was successful,
     ///     or false if the user was not found or there was an error during the process.
     /// </returns>
-    Task<bool> UploadProfilePictureAsync(Guid userId, IFormFile? profilePicture);
+    Task<bool> UploadCoverImageAsync(Guid userId, IFormFile? coverImage);
 }
 
 /// <summary>
@@ -127,23 +127,22 @@ public class UserService(
     }
 
     /// <inheritdoc />
-    public async Task<bool> UploadProfilePictureAsync(Guid userId, IFormFile? profilePicture)
+    public async Task<bool> UploadCoverImageAsync(Guid userId, IFormFile? coverImage)
     {
         var user = await userRepository.GetAsync(userId);
         if (user == null) return false;
 
-        if (profilePicture == null || profilePicture.Length == 0)
+        if (coverImage == null || coverImage.Length == 0)
         {
             if (!string.IsNullOrEmpty(user.ProfileImageUrl) && File.Exists(user.ProfileImageUrl))
                 File.Delete(user.ProfileImageUrl);
 
             user.ProfileImageUrl = storageOptions.Value.DefaultUserImagePath;
             await userRepository.UpdateAsync(user.Id, user);
-
             return true;
         }
 
-        await imageValidator.ValidateAndThrowAsync(profilePicture);
+        await imageValidator.ValidateAndThrowAsync(coverImage);
 
         var fileName = $"{userId}.png";
         var filePath = Path.Combine(storageOptions.Value.StorageFolderPath, "user-images", fileName);
@@ -153,7 +152,7 @@ public class UserService(
 
         await using (var stream = new FileStream(filePath, FileMode.Create))
         {
-            await profilePicture.CopyToAsync(stream);
+            await coverImage.CopyToAsync(stream);
         }
 
         user.ProfileImageUrl = filePath;

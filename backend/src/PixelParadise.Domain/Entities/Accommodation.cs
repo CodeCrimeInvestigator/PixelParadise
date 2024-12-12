@@ -2,9 +2,9 @@
 
 namespace PixelParadise.Domain.Entities;
 
-public class Rental : BaseEntity
+public class Accommodation : BaseEntity
 {
-    public Rental(string name, string description, int price, Guid ownerId)
+    public Accommodation(string name, string description, int price, Guid ownerId)
     {
         Name = name;
         Description = description;
@@ -13,7 +13,7 @@ public class Rental : BaseEntity
         Bookings = [];
     }
 
-    public Rental()
+    public Accommodation()
     {
     }
 
@@ -23,4 +23,6 @@ public class Rental : BaseEntity
     public Guid OwnerId { get; set; }
     [NotMapped] public User Owner { get; set; }
     public List<Booking> Bookings { get; set; } = [];
+    public string CoverImage { get; set; }
+    public List<string> Images { get; set; } = [];
 }

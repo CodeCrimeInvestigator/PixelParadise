@@ -16,7 +16,7 @@ public class StorageOptions
     public string DefaultUserImagePath { get; set; }
 
     /// <summary>
-    ///     The file path to the default main image for accommodations that do not have a user-uploaded image.
+    ///     The file path to the default cover image for accommodations that do not have a user-uploaded image.
     /// </summary>
-    public static string DefaultAccommodationMainImagePath { get; set; }
+    public string DefaultAccommodationCoverImagePath { get; set; }
 }

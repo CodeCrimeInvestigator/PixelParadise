@@ -16,14 +16,14 @@ public static class RepositoryRegistrar
     ///     This method registers the following repositories with singleton lifetimes:
     ///     - Generic repository for handling all entities (`IRepository)
     ///     - User-related repository (`IUserRepository`)
-    ///     - Rental-related repository (`IRentalRepository`)
+    ///     - Accommodation-related repository (`IAccommodationRepository`)
     ///     - Booking-related repository (`IBookingRepository`)
     /// </remarks>
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddSingleton(typeof(IRepository<>), typeof(Repository<>));
         services.AddSingleton<IUserRepository, UserRepository>();
-        services.AddSingleton<IRentalRepository, RentalRepository>();
+        services.AddSingleton<IAccommodationRepository, AccommodationRepository>();
         services.AddSingleton<IBookingRepository, BookingRepository>();
         return services;
     }

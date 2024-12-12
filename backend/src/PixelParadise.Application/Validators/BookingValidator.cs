@@ -9,18 +9,18 @@ namespace PixelParadise.Infrastructure.Validators;
 /// </summary>
 public class BookingValidator : AbstractValidator<Booking>
 {
-    private readonly IRentalRepository _rentalRepository;
+    private readonly IAccommodationRepository _accommodationRepository;
     private readonly IUserRepository _userRepository;
 
-    public BookingValidator(IUserRepository userRepository, IRentalRepository rentalRepository)
+    public BookingValidator(IUserRepository userRepository, IAccommodationRepository accommodationRepository)
     {
         _userRepository = userRepository;
-        _rentalRepository = rentalRepository;
+        _accommodationRepository = accommodationRepository;
 
         RuleFor(booking => booking.UserId).MustAsync(ValidateUser)
             .WithMessage("User with specified Id does not exist.");
 
-        RuleFor(booking => booking.RentalId)
+        RuleFor(booking => booking.AccommodationId)
             .MustAsync(ValidateRental).WithMessage("Rental with specified Id does not exist.");
 
         RuleFor(booking => booking.AmountPaid)
@@ -39,9 +39,9 @@ public class BookingValidator : AbstractValidator<Booking>
     private async Task<bool> ValidateRental(Booking booking, Guid rentalId,
         CancellationToken cancellationToken = default)
     {
-        var existingRental = await _rentalRepository.GetAsync(rentalId);
+        var existingRental = await _accommodationRepository.GetAsync(rentalId);
         if (existingRental != null)
-            return existingRental.Id == booking.RentalId;
+            return existingRental.Id == booking.AccommodationId;
         return false;
     }
 }

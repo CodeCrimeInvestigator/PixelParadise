@@ -2,7 +2,7 @@
 
 public class GetAllBookingRequest : PagedRequest
 {
-    public Guid? RentalId { get; set; }
+    public Guid? AccommodationId { get; set; }
     public Guid? UserId { get; set; }
     public DateTimeOffset? CheckIn { get; set; }
     public DateTimeOffset? CheckOut { get; set; }

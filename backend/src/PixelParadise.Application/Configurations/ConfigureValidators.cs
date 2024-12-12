@@ -21,7 +21,7 @@ public static class ValidatorRegistrar
     public static IServiceCollection AddValidators(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblyContaining<UserValidator>(ServiceLifetime.Singleton);
-        services.AddValidatorsFromAssemblyContaining<RentalValidator>(ServiceLifetime.Singleton);
+        services.AddValidatorsFromAssemblyContaining<AccommodationValidator>(ServiceLifetime.Singleton);
         services.AddValidatorsFromAssemblyContaining<BookingValidator>(ServiceLifetime.Singleton);
         services.AddValidatorsFromAssemblyContaining<ImageValidator>(ServiceLifetime.Singleton);
         return services;

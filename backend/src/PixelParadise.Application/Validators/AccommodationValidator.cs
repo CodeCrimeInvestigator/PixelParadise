@@ -7,11 +7,11 @@ namespace PixelParadise.Infrastructure.Validators;
 /// <summary>
 ///     Validator class for validating rental entities using FluentValidation.
 /// </summary>
-public class RentalValidator : AbstractValidator<Rental>
+public class AccommodationValidator : AbstractValidator<Accommodation>
 {
     private readonly IUserRepository _userRepository;
 
-    public RentalValidator(IUserRepository userRepository)
+    public AccommodationValidator(IUserRepository userRepository)
     {
         _userRepository = userRepository;
 
@@ -28,7 +28,7 @@ public class RentalValidator : AbstractValidator<Rental>
             .WithMessage("User with specified Id does not exist.");
     }
 
-    private async Task<bool> ValidateOwner(Rental rental, Guid ownerId, CancellationToken token = default)
+    private async Task<bool> ValidateOwner(Accommodation rental, Guid ownerId, CancellationToken token = default)
     {
         var existingUser = await _userRepository.GetAsync(ownerId);
         if (existingUser != null)

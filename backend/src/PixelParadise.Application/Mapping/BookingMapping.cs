@@ -13,7 +13,7 @@ public static class BookingMapping
         return new Booking
         {
             Id = Guid.NewGuid(),
-            RentalId = request.RentalId,
+            AccommodationId = request.AccommodationId,
             UserId = request.UserId,
             CheckIn = request.CheckIn,
             CheckOut = request.CheckOut,
@@ -27,7 +27,7 @@ public static class BookingMapping
         return new BookingResponse
         {
             BookingId = booking.Id,
-            RentalId = booking.RentalId,
+            AccommodationId = booking.AccommodationId,
             UserId = booking.UserId,
             CheckIn = booking.CheckIn,
             CheckOut = booking.CheckOut,
@@ -40,7 +40,7 @@ public static class BookingMapping
     {
         return new GetAllBookingOptions
         {
-            RentalId = request.RentalId,
+            AccommodationId = request.AccommodationId,
             UserId = request.UserId,
             CheckIn = request.CheckIn,
             CheckOut = request.CheckOut,

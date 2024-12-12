@@ -19,6 +19,6 @@ public class User : BaseEntity
     public string Email { get; set; }
     public int Age { get; set; }
     public string ProfileImageUrl { get; set; }
-    public List<Rental> Rentals { get; set; } = [];
+    public List<Accommodation> Accommodations { get; set; } = [];
     public List<Booking> Bookings { get; set; } = [];
 }

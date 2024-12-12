@@ -15,7 +15,10 @@ namespace PixelParadise.Application.Controllers;
 ///     information.
 /// </summary>
 [ApiController]
-public class UserController(IUserService userService, IOptions<StorageOptions> options, ILogger logger) : ControllerBase
+public class UserController(
+    IUserService userService,
+    IOptions<StorageOptions> options,
+    ILogger logger) : ControllerBase
 {
     private ILogger Logger => logger.ForContext<UserController>();
 
@@ -165,8 +168,8 @@ public class UserController(IUserService userService, IOptions<StorageOptions> o
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UploadCoverImage(Guid userId, IFormFile? coverImage)
     {
-        var res = await userService.UploadProfilePictureAsync(userId, coverImage);
-        if (!res)
+        var wasSuccess = await userService.UploadCoverImageAsync(userId, coverImage);
+        if (!wasSuccess)
             return NotFound("Failed to upload profile picture because there is no user with specified userId");
         return Ok("Cover image uploaded successfully.");
     }

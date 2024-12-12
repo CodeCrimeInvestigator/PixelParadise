@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using Npgsql;
 using PixelParadise.Application.Logging;
 using PixelParadise.Application.Mapping;
 using PixelParadise.Application.Options;
@@ -42,6 +41,7 @@ public class Startup
     /// <param name="builderEnvironment">The hosting environment the application is running in.</param>
     public void ConfigureServices(IServiceCollection services, IWebHostEnvironment builderEnvironment)
     {
+        //TODO: add option to clean storage folders automatically 
         services.Configure<StorageOptions>(_configuration.GetSection("StorageOptions"));
         services.AddDbContext(_postgreSqlOptions);
         services.AddRepositories();
@@ -50,6 +50,17 @@ public class Startup
         services.AddLogging(_configuration);
         services.AddSwagger(_startupOptions);
         services.AddControllers();
+
+        //TODO: find out how to improve this
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAngularOrigin", builder =>
+            {
+                builder.WithOrigins("http://localhost:4200") // Allow your Angular app's origin
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
+        });
     }
 
     /// <summary>
@@ -63,17 +74,13 @@ public class Startup
     {
         using var scope = app.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<PixelParadiseContext>();
-        
+
         //TODO: extract logic to method
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseCors();
-            await context.Database.EnsureDeletedAsync();
-        }
-        
+        if (app.Environment.IsDevelopment()) app.UseCors("AllowAngularOrigin");
+
         var databaseInitializer = new DatabaseInitializer(context, _logger, builderEnvironment);
         await databaseInitializer.InitializeDatabaseAsync();
-        
+
         app.UsePathBase("/api");
 
         if (_startupOptions.EnableSwagger)

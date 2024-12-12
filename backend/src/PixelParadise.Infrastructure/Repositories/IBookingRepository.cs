@@ -25,12 +25,13 @@ public interface IBookingRepository : IRepository<Booking>
 /// </summary>
 public class BookingRepository(PixelParadiseContext ctx) : Repository<Booking>(ctx), IBookingRepository
 {
+    /// <inheritdoc />
     public async Task<PaginatedResult<Booking>> GetAllAsync(GetAllBookingOptions options)
     {
         var query = ctx.Bookings.AsQueryable();
 
-        if (options.RentalId != null)
-            query = query.Where(b => b.RentalId.Equals(options.RentalId));
+        if (options.AccommodationId != null)
+            query = query.Where(b => b.AccommodationId.Equals(options.AccommodationId));
 
         if (options.UserId != null)
             query = query.Where(b => b.UserId.Equals(options.UserId));

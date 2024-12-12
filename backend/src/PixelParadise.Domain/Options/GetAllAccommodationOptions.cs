@@ -1,6 +1,6 @@
 ﻿namespace PixelParadise.Domain.Options;
 
-public class GetAllRentalOptions
+public class GetAllAccommodationOptions
 {
     public string? Name { get; set; }
     public string? Description { get; set; }

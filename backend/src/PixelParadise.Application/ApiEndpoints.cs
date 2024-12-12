@@ -19,15 +19,17 @@ public static class ApiEndpoints
         public const string UpdateImage = $"{Base}/{{userId:guid}}/images";
     }
 
-    public static class Rentals
+    public static class Accommodations
     {
-        private const string Base = $"{ApiBase}/rentals";
+        private const string Base = $"{ApiBase}/accommodation";
         public const string Create = Base;
-        public const string Get = $"{Base}/{{rentalId:guid}}";
+        public const string Get = $"{Base}/{{accommodationId:guid}}";
         public const string GetAll = Base;
-        public const string Update = $"{Base}/{{rentalId:guid}}";
-        public const string Delete = $"{Base}/{{rentalId:guid}}";
-        public const string GetImage = $"{Base}/{{rentalId:guid}}/cover-image";
+        public const string Update = $"{Base}/{{accommodationId:guid}}";
+        public const string Delete = $"{Base}/{{accommodationId:guid}}";
+        public const string UpdateCoverImage = $"{Base}/{{accommodationId:guid}}/cover-image";
+        public const string AddAccommodationImage = $"{Base}/{{accommodationId:guid}}/images";
+        public const string RemoveAccommodationImage = $"{Base}/{{accommodationId:guid}}/images/{{imageId}}";
     }
 
     public static class Bookings
