@@ -41,6 +41,15 @@ services:
     networks:
       - pixel-paradise-network
 
+  media-server:
+    build:
+      context: ./
+      dockerfile: mediaServer.dockerfile
+    volumes:
+      - ../storage/images:/usr/share/nginx/html/images
+    ports:
+      - "8080:80"
+
 volumes:
   pixel-paradise-data:
   elasticsearch-data:
