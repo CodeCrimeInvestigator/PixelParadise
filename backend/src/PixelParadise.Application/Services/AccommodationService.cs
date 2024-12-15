@@ -151,10 +151,11 @@ public class AccommodationService(
 
         if (coverImage == null || coverImage.Length == 0)
         {
-            if (!string.IsNullOrEmpty(accommodation.CoverImage) && File.Exists(accommodation.CoverImage))
+            var imagePath = Path.Combine(storageOptions.Value.AbsStoragePath, accommodation.CoverImage).Replace("/", "\\");
+            if (!string.IsNullOrEmpty(accommodation.CoverImage) && File.Exists(imagePath))
                 File.Delete(accommodation.CoverImage);
 
-            accommodation.CoverImage = storageOptions.Value.DefaultAccommodationCoverImagePath;
+            accommodation.CoverImage = storageOptions.Value.RelDefaultAccommodationCoverImagePath;
             await accommodationRepository.UpdateAsync(accommodation.Id, accommodation);
             return true;
         }
@@ -162,7 +163,7 @@ public class AccommodationService(
         await imageValidator.ValidateAndThrowAsync(coverImage);
 
         var fileName = $"{accommodationId}.png";
-        var filePath = Path.Combine(storageOptions.Value.StorageFolderPath, "accommodation-images", fileName);
+        var filePath = Path.Combine(storageOptions.Value.AbsStoragePath, "images/accommodation", fileName);
 
         var directoryPath = Path.GetDirectoryName(filePath);
         if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
@@ -171,8 +172,9 @@ public class AccommodationService(
         {
             await coverImage.CopyToAsync(stream);
         }
-
-        accommodation.CoverImage = filePath;
+        var relativePath = Path.Combine("images/accommodation", fileName).Replace("\\", "/");
+        
+        accommodation.CoverImage = relativePath;
         await accommodationRepository.UpdateAsync(accommodation.Id, accommodation);
 
         return true;
@@ -184,10 +186,21 @@ public class AccommodationService(
         var accommodation = await accommodationRepository.GetAsync(accommodationId);
         if (accommodation == null) return false;
 
+        if (image == null || image.Length == 0)
+        {
+            var imagePath = Path.Combine(storageOptions.Value.AbsStoragePath, accommodation.CoverImage).Replace("/", "\\");
+            if (!string.IsNullOrEmpty(accommodation.CoverImage) && File.Exists(imagePath))
+                File.Delete(accommodation.CoverImage);
+
+            accommodation.CoverImage = storageOptions.Value.RelDefaultAccommodationCoverImagePath;
+            await accommodationRepository.UpdateAsync(accommodation.Id, accommodation);
+            return true;
+        }
+
         await imageValidator.ValidateAndThrowAsync(image);
 
         var fileName = $"{accommodationId}.png";
-        var filePath = Path.Combine(storageOptions.Value.StorageFolderPath, "accommodation-images", fileName);
+        var filePath = Path.Combine(storageOptions.Value.AbsStoragePath, "images/accommodation", fileName);
 
         var directoryPath = Path.GetDirectoryName(filePath);
         if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
@@ -196,8 +209,9 @@ public class AccommodationService(
         {
             await image.CopyToAsync(stream);
         }
-
-        accommodation.Images.Add(filePath);
+        var relativePath = Path.Combine("images/accommodation", fileName).Replace("\\", "/");
+        
+        accommodation.Images.Add(relativePath);
         await accommodationRepository.UpdateAsync(accommodation.Id, accommodation);
 
         return true;
@@ -210,9 +224,8 @@ public class AccommodationService(
         if (accommodation == null) return false;
 
         var imageName = $"{imageId}.png";
-        var imagePath = Path.Combine(storageOptions.Value.StorageFolderPath, "accommodation-images", imageName);
-
-
+        var imagePath = Path.Combine(storageOptions.Value.AbsStoragePath, "images/accommodation", imageName).Replace("\\", "/");
+        
         if (!accommodation.Images.Contains(imagePath))
             return false;
 
@@ -221,7 +234,7 @@ public class AccommodationService(
 
         accommodation.Images.Remove(imagePath);
         await accommodationRepository.UpdateAsync(accommodation.Id, accommodation);
-
+        
         return true;
     }
 }

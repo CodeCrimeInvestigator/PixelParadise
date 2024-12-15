@@ -14,7 +14,7 @@ public static class UserMapping
     {
         return new User(request.UserName, request.NickName, request.Email, request.Age)
         {
-            ProfileImageUrl = options.Value.DefaultUserImagePath
+            ProfileImageUrl = options.Value.RelDefaultUserImagePath
         };
     }
 

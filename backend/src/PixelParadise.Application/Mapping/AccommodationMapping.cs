@@ -19,7 +19,7 @@ public static class RentalMapping
             Description = request.Description,
             Price = request.Price,
             OwnerId = request.OwnerId,
-            CoverImage = options.Value.DefaultAccommodationCoverImagePath
+            CoverImage = options.Value.RelDefaultAccommodationCoverImagePath
         };
     }
 

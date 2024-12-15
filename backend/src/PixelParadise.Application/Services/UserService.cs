@@ -134,10 +134,11 @@ public class UserService(
 
         if (coverImage == null || coverImage.Length == 0)
         {
-            if (!string.IsNullOrEmpty(user.ProfileImageUrl) && File.Exists(user.ProfileImageUrl))
-                File.Delete(user.ProfileImageUrl);
+            var imagePath = Path.Combine(storageOptions.Value.AbsStoragePath, user.ProfileImageUrl).Replace("/", "\\");
+            if (!string.IsNullOrEmpty(user.ProfileImageUrl) && File.Exists(imagePath))
+                File.Delete(imagePath);
 
-            user.ProfileImageUrl = storageOptions.Value.DefaultUserImagePath;
+            user.ProfileImageUrl = storageOptions.Value.RelDefaultUserImagePath;
             await userRepository.UpdateAsync(user.Id, user);
             return true;
         }
@@ -145,7 +146,7 @@ public class UserService(
         await imageValidator.ValidateAndThrowAsync(coverImage);
 
         var fileName = $"{userId}.png";
-        var filePath = Path.Combine(storageOptions.Value.StorageFolderPath, "user-images", fileName);
+        var filePath = Path.Combine(storageOptions.Value.AbsStoragePath, "images/user", fileName);
 
         var directoryPath = Path.GetDirectoryName(filePath);
         if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
@@ -154,8 +155,9 @@ public class UserService(
         {
             await coverImage.CopyToAsync(stream);
         }
+        var relativePath = Path.Combine("images/user", fileName).Replace("\\", "/");
 
-        user.ProfileImageUrl = filePath;
+        user.ProfileImageUrl = relativePath;
         await userRepository.UpdateAsync(user.Id, user);
 
         return true;
