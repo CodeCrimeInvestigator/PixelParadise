@@ -18,10 +18,11 @@ public class BookingValidator : AbstractValidator<Booking>
         _accommodationRepository = accommodationRepository;
 
         RuleFor(booking => booking.UserId).MustAsync(ValidateUser)
-            .WithMessage("User with specified Id does not exist.");
+            .WithMessage("User with specified Id '{PropertyValue}' does not exist.");
 
         RuleFor(booking => booking.AccommodationId)
-            .MustAsync(ValidateRental).WithMessage("Rental with specified Id does not exist.");
+            .MustAsync(ValidateAccommodation)
+            .WithMessage("Accommodation with specified Id '{PropertyValue}' does not exist.");
 
         RuleFor(booking => booking.AmountPaid)
             .GreaterThanOrEqualTo(0)
@@ -36,12 +37,12 @@ public class BookingValidator : AbstractValidator<Booking>
         return false;
     }
 
-    private async Task<bool> ValidateRental(Booking booking, Guid rentalId,
+    private async Task<bool> ValidateAccommodation(Booking booking, Guid accommodationId,
         CancellationToken cancellationToken = default)
     {
-        var existingRental = await _accommodationRepository.GetAsync(rentalId);
-        if (existingRental != null)
-            return existingRental.Id == booking.AccommodationId;
+        var existingAccommodation = await _accommodationRepository.GetAsync(accommodationId);
+        if (existingAccommodation != null)
+            return existingAccommodation.Id == booking.AccommodationId;
         return false;
     }
 }
