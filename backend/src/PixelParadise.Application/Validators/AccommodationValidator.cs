@@ -15,24 +15,24 @@ public class AccommodationValidator : AbstractValidator<Accommodation>
     {
         _userRepository = userRepository;
 
-        RuleFor(rental => rental.Name)
+        RuleFor(accommodation => accommodation.Name)
             .NotEmpty().NotNull()
-            .WithMessage("Name cannot be empty.");
+            .WithMessage("'Name' must not be empty.");
 
-        RuleFor(rental => rental.Price)
+        RuleFor(accommodation => accommodation.Price)
             .GreaterThanOrEqualTo(0)
             .WithMessage("Price must be greater than or equal to 0.");
 
-        RuleFor(rental => rental.OwnerId)
+        RuleFor(accommodation => accommodation.OwnerId)
             .MustAsync(ValidateOwner)
-            .WithMessage("User with specified Id does not exist.");
+            .WithMessage("User with specified Id '{PropertyValue}' does not exist.");
     }
 
-    private async Task<bool> ValidateOwner(Accommodation rental, Guid ownerId, CancellationToken token = default)
+    private async Task<bool> ValidateOwner(Accommodation accommodation, Guid ownerId, CancellationToken token = default)
     {
         var existingUser = await _userRepository.GetAsync(ownerId);
         if (existingUser != null)
-            return existingUser.Id == rental.OwnerId;
+            return existingUser.Id == accommodation.OwnerId;
         return false;
     }
 }

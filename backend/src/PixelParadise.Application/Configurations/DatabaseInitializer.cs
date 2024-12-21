@@ -36,11 +36,11 @@ public class DatabaseInitializer
         while (retryCount < maxRetryCount && !dbConnectionSuccessful)
             try
             {
-                if (_environment.IsDevelopment())
+                /*if (_environment.IsDevelopment())
                 {
                     _logger.Information("Development mode: Deleting existing database.");
                     await _context.Database.EnsureDeletedAsync();
-                }
+                }*/
 
                 _logger.Information("Ensuring database is created.");
                 await _context.Database.EnsureCreatedAsync();
