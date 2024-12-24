@@ -3,7 +3,7 @@ using FluentValidation.TestHelper;
 using NSubstitute;
 using PixelParadise.Domain.Entities;
 using PixelParadise.Infrastructure.Repositories;
-using PixelParadise.Infrastructure.Validators;
+using PixelParadise.Application.Validators;
 using User = PixelParadise.Domain.Entities.User;
 
 namespace PixelParadise.Test;

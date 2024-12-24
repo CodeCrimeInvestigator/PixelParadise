@@ -1,0 +1,32 @@
+<div class="sidebar">
+  <h3>Filters</h3>
+  <label>
+    Name:
+    <input type="text" [(ngModel)]="filters.name" (keyup.enter)="onFilterChange()" />
+  </label>
+  <label>
+    Description:
+    <input type="text" [(ngModel)]="filters.description" (keyup.enter)="onFilterChange()" />
+  </label>
+  <label>
+    Price Lower Limit:
+    <input type="number" [(ngModel)]="filters.priceLowerLimit" (change)="onFilterChange()" />
+  </label>
+  <label>
+    Price Upper Limit:
+    <input type="number" [(ngModel)]="filters.priceUpperLimit" (change)="onFilterChange()" />
+  </label>
+  <label>
+    Owner Username:
+    <input type="text" [(ngModel)]="filters.ownerUsername" (keyup.enter)="onFilterChange()" />
+  </label>
+  <label>
+    Sort By:
+    <select [(ngModel)]="filters.sortBy" (change)="onFilterChange()">
+      <option value="name">Name</option>
+      <option value="price">Price</option>
+      <option value="ownerUsername">Owner Username</option>
+    </select>
+  </label>
+  <button (click)="onFilterChange()">Apply Filters</button>
+</div>

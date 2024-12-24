@@ -2,7 +2,7 @@
 using PixelParadise.Domain.Entities;
 using PixelParadise.Infrastructure.Repositories;
 
-namespace PixelParadise.Infrastructure.Validators;
+namespace PixelParadise.Application.Validators;
 
 /// <summary>
 ///     Validator class for validating booking entities using FluentValidation.

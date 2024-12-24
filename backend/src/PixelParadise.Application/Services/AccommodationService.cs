@@ -114,7 +114,6 @@ public class AccommodationService(
     {
         await accommodationValidator.ValidateAndThrowAsync(Accommodation);
         return await accommodationRepository.CreateAsync(Accommodation);
-        ;
     }
 
     /// <inheritdoc />

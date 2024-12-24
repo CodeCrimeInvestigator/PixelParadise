@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using PixelParadise.Infrastructure.Validators;
+using PixelParadise.Application.Validators;
 
 namespace PixelParadise.Application.Logging;
 

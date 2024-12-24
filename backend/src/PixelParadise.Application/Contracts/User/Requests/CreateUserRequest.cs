@@ -8,5 +8,5 @@ public class CreateUserRequest
 
     public string Email { get; init; }
 
-    public int Age { get; init; }
+    public int Age { get; set; }
 }

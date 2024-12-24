@@ -16,6 +16,7 @@ namespace PixelParadise.Application.Controllers;
 /// </summary>
 [ApiController]
 public class UserController(
+    IUserMapper userMapper,
     IUserService userService,
     IOptions<StorageOptions> options,
     ILogger logger) : ControllerBase
@@ -37,12 +38,12 @@ public class UserController(
     {
         Logger.Information("Received request to create user with data: {@RequestData}", request);
         Logger.Debug("Request data: {@RequestData}", request);
-        var user = request.MapToUser(options);
+        var user = userMapper.MapToUser(request, options);
 
         await userService.CreateUserAsync(user);
         Logger.Information("User successfully created with ID: {UserId}", user.Id);
 
-        var userResponse = user.MapToResponse();
+        var userResponse = userMapper.MapToResponse(user);
         Logger.Debug("Response data prepared for created user. Response: {@UserResponse}", userResponse);
 
         return CreatedAtAction(nameof(Get), new { userId = user.Id }, userResponse);
@@ -70,7 +71,7 @@ public class UserController(
         }
 
         Logger.Information("User found with User ID: {UserId}", userId);
-        var userResponse = user.MapToResponse();
+        var userResponse = userMapper.MapToResponse(user);
 
         Logger.Debug("Response data prepared for retrieved user. Response: {@UserResponse}", userResponse);
         return Ok(userResponse);
@@ -88,11 +89,11 @@ public class UserController(
     public async Task<IActionResult> GetAll([FromQuery] GetAllUsersRequest? request)
     {
         Logger.Information("Retrieve all users request received. Filter Criteria: {@FilterCriteria}", request);
-        var searchOptions = request.MapToOptions();
+        var searchOptions = userMapper.MapToOptions(request);
         var users = await userService.GetAllUsersAsync(searchOptions);
 
         Logger.Information("Users retrieved successfully with UserCount: {UserCount}", users.TotalCount);
-        var usersResponse = users.MapToResponse();
+        var usersResponse = userMapper.MapToResponse(users);
 
         Logger.Debug("Response data prepared for all users. Response: {@UsersResponse}", usersResponse);
         return Ok(usersResponse);
@@ -115,7 +116,7 @@ public class UserController(
     {
         Logger.Information("Update user request received. User ID: {UserId}, Request Data: {@RequestData}", userId,
             request);
-        var user = request.MapToUser(userId);
+        var user = userMapper.MapToUser(request, userId);
         var updatedUser = await userService.UpdateUser(user);
         if (updatedUser == null)
         {
@@ -124,7 +125,7 @@ public class UserController(
         }
 
         Logger.Information("User updated successfully with User ID: {UserId}", userId);
-        var response = user.MapToResponse();
+        var response = userMapper.MapToResponse(updatedUser);
 
         Logger.Debug("Response data prepared for updated user. Response: {@UserResponse}", response);
         return Ok(response);

@@ -29,4 +29,7 @@
       <ProjectReference Include="..\PixelParadise.Infrastructure\PixelParadise.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="PixelParadise.Tests.Integration" />
+    </ItemGroup>
 </Project>

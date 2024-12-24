@@ -1,0 +1,28 @@
+<app-filters (filterChange)="applyFilters($event)"></app-filters>
+
+<div class="search-container">
+  <input
+    type="text"
+    [(ngModel)]="searchQuery"
+    placeholder="Search by accommodation name"
+    (keyup.enter)="loadAccommodations(currentPage, pageSize)"
+  />
+  <button (click)="loadAccommodations(currentPage, pageSize)">Search</button>
+</div>
+
+<div class="rental-container" *ngFor="let accommodation of accommodations">
+  <div class="rental-card">
+    <div class="rental-image">
+      <img [src]="'http://localhost:8080/' + accommodation.coverImageUrl" alt="{{ accommodation.name }}" />
+    </div>
+    <div class="rental-info">
+      <h2>{{ accommodation.name }}</h2>
+      <h1>{{ accommodation.price }}<span class="price-symbol">€</span></h1>
+      <div class="description-title">Description:</div>
+      <p>{{ accommodation.description }}</p>
+    </div>
+    <div class="rental-owner">
+      <p>Owner ID: {{ accommodation.ownerId }}</p>
+    </div>
+  </div>
+</div>

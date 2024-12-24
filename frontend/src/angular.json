@@ -1,0 +1,15 @@
+{
+  "architect": {
+    "build": {
+      "options": {
+        "proxyConfig": "proxy.conf.json"
+      }
+    },
+    "serve": {
+      "options": {
+        "proxyConfig": "proxy.conf.json"
+      }
+    }
+  }
+}
+

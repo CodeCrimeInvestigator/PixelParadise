@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace PixelParadise.Infrastructure.Validators;
+namespace PixelParadise.Application.Validators;
 
 /// <summary>
 ///     Validator class for validating profile picture uploads.

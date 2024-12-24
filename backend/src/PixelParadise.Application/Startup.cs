@@ -47,6 +47,7 @@ public class Startup
         services.AddRepositories();
         services.AddServices();
         services.AddValidators();
+        services.AddMappers();
         services.AddLogging(_configuration);
         services.AddSwagger(_startupOptions);
         services.AddControllers();

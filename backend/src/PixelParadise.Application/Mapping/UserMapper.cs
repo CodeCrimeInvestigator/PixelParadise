@@ -8,9 +8,20 @@ using PixelParadise.Infrastructure.Repositories.Results;
 
 namespace PixelParadise.Application.Mapping;
 
-public static class UserMapping
+
+public interface IUserMapper
 {
-    public static User MapToUser(this CreateUserRequest request, IOptions<StorageOptions> options)
+    User MapToUser(CreateUserRequest request, IOptions<StorageOptions> options);
+    User MapToUser(UpdateUserRequest request, Guid id);
+    UserResponse MapToResponse(User user);
+    UsersResponse MapToResponse(PaginatedResult<User> users);
+    GetAllUsersOptions MapToOptions(GetAllUsersRequest request);
+}
+
+
+public class UserMapper : IUserMapper
+{
+    public User MapToUser(CreateUserRequest request, IOptions<StorageOptions> options)
     {
         return new User(request.UserName, request.NickName, request.Email, request.Age)
         {
@@ -18,7 +29,7 @@ public static class UserMapping
         };
     }
 
-    public static User MapToUser(this UpdateUserRequest request, Guid id)
+    public User MapToUser(UpdateUserRequest request, Guid id)
     {
         return new User
         {
@@ -29,8 +40,8 @@ public static class UserMapping
             Age = request.Age
         };
     }
-
-    public static UserResponse MapToResponse(this User user)
+    
+    public UserResponse MapToResponse(User user)
     {
         return new UserResponse
         {
@@ -42,9 +53,8 @@ public static class UserMapping
             ProfileImageUrl = user.ProfileImageUrl
         };
     }
-
-
-    public static UsersResponse MapToResponse(this PaginatedResult<User> users)
+    
+    public UsersResponse MapToResponse(PaginatedResult<User> users)
     {
         return new UsersResponse
         {
@@ -55,7 +65,7 @@ public static class UserMapping
         };
     }
 
-    public static GetAllUsersOptions MapToOptions(this GetAllUsersRequest request)
+    public GetAllUsersOptions MapToOptions(GetAllUsersRequest request)
     {
         return new GetAllUsersOptions
         {
